@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: projectmanager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: projectmanager
+      POSTGRES_PASSWORD: projectmanager
+      POSTGRES_DB: projectmanager
+    ports:
+      - "5432:5432"
+    volumes:
+      - projectmanager-db-data:/var/lib/postgresql/data
+
+volumes:
+  projectmanager-db-data:
