@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
@@ -8,22 +7,27 @@ using ProjectManager.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// ---- Servis kayıtları (DI container'a "bunları tanıyorum" diyoruz) ----
+
 builder.Services.AddOpenApi();
 
+// AppDbContext: EF Core'un Postgres'e bağlanma bilgisi (connection string user-secrets'tan gelir).
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Composition Root: interface -> gerçek implementasyon eşleştirmeleri burada yapılıyor.
+// Application/Infrastructure hiçbiri bu eşleştirmeyi görmez, sadece bu satırlar bilir.
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<AuthService>();
 
+// Controller (AuthController gibi) desteğini aç - .NET 10 webapi şablonu varsayılan açmıyor.
 builder.Services.AddControllers();
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ---- HTTP pipeline (istekler bu sıradan geçer) ----
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -31,17 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Gelen istekleri [Route]/[HttpPost] gibi attribute'lara sahip Controller'lara yönlendir.
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
