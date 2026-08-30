@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManager.Application.DTOs.Auth;
 using ProjectManager.Application.Services;
@@ -34,5 +36,32 @@ public class AuthController : ControllerBase
             // "email zaten var" iş kuralı ihlali -> 409 Conflict
             return Conflict(new { message = ex.Message });
         }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequest request)
+    {
+        try
+        {
+            var response = await _authService.LoginAsync(request);
+            return Ok(response);   // 200 + AuthResponse JSON
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // "email veya şifre hatalı" -> 401 Unauthorized
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    // [Authorize] test endpoint'i: geçerli token yoksa framework OTOMATİK 401 döner,
+    // buradaki kod hiç çalışmaz. Token geçerliyse, içindeki claim'leri okuyoruz.
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        return Ok(new { userId, email });
     }
 }

@@ -22,4 +22,6 @@ public class UserRepository : IUserRepository
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
     }
+
+    public Task<bool> AnyUsersExistAsync() => _db.Users.AnyAsync();
 }

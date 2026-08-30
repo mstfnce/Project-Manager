@@ -11,16 +11,22 @@ public class AuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly ITokenGenerator _tokenGenerator;
 
     // Constructor injection: DI container bu iki arayüzü otomatik doldurur.
-    public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenGenerator tokenGenerator)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
+        _tokenGenerator = tokenGenerator;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
+        // İş kuralı (Karar #4): tek kullanıcılı proje - ilk kayıttan sonra register kapanır.
+        if (await _userRepository.AnyUsersExistAsync())
+            throw new InvalidOperationException("Kayıt kapalı: sistemde zaten bir kullanıcı var.");
+
         // İş kuralı: aynı email ile iki kayıt olamaz.
         if (await _userRepository.ExistsByEmailAsync(request.Email))
             throw new InvalidOperationException("Bu email zaten kullanılıyor.");
@@ -38,4 +44,18 @@ public class AuthService
         // Token boş: register otomatik giriş yapmaz, ayrı bir login gerekir (Bölüm 4.4).
         return new AuthResponse(user.Id, user.Email, user.DisplayName, Token: "");
     }
+
+
+    public async Task<AuthResponse> LoginAsync(LoginRequest request)
+    {
+        var user = await _userRepository.GetByEmailAsync(request.Email);
+
+        if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
+            throw new UnauthorizedAccessException("Email veya şifre hatalı.");
+
+        var token = _tokenGenerator.GenerateToken(user);
+
+        return new AuthResponse(user.Id, user.Email, user.DisplayName, token);
+    }
+
 }
