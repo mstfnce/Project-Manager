@@ -49,3 +49,13 @@ Identity, e-posta göndermeyi bilmiyor, sadece "e-posta gönderebilecek bir şey
 ver" diyor; `SendGridEmailSender` gibi bir sınıf bu sözü tutuyor, `Program.cs`/
 `Startup.cs`'te `AddTransient<IEmailSender, SendGridEmailSender>()` ile
 eşleştiriliyor.
+
+## Ek not — DTO'lar neden Infrastructure'da değil Application'da
+
+"Dış dünyaya bakan yüz" (DTO) ile Infrastructure'ın "dış dünya"sı aynı şey
+değil. Infrastructure'daki dış dünya = **teknoloji bağımlılığı** (EF Core,
+BCrypt, JWT kütüphaneleri). DTO'lar (`CreateProjectRequest`, `ProjectResponse`
+gibi) ise saf `record` — hiçbir teknoloji `using`'i taşımıyor, sadece veri
+şekli tanımlıyor. Bu yüzden Domain entity'leri gibi "temiz" kalıyorlar ve
+Application'a ait olabiliyorlar; asıl kriter "dışa mı bakıyor" değil,
+"teknik bağımlılığı var mı" sorusu.
