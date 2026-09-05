@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +29,6 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ProjectService>();
 
-// Controller (AuthController gibi) desteğini aç - .NET 10 webapi şablonu varsayılan açmıyor.
-builder.Services.AddControllers();
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -48,6 +45,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Controller (AuthController gibi) desteğini aç - .NET 10 webapi şablonu varsayılan açmıyor.
+// AddJsonOptions: enum'lar JSON'a sayı değil string olarak yazılsın ("Planning", "Todo").
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
