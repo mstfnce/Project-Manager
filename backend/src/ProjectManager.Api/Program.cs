@@ -29,6 +29,11 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ProjectService>();
 
+// Task CRUD icin de ayni composition root deseni: TaskService constructor'inda
+// hem ITaskRepository hem IProjectRepository istiyor - ikisi de zaten kayitli.
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<TaskService>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
