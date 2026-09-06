@@ -1,11 +1,14 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjectManager.Api.Middleware;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
+using ProjectManager.Application.Validators;
 using ProjectManager.Infrastructure.Data;
 using ProjectManager.Infrastructure.Repositories;
 using ProjectManager.Infrastructure.Services;
@@ -68,6 +71,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddAuthorization();
+
+// Application projesindeki TUM validator siniflarini (CreateTaskRequestValidator vb.)
+// tek satirla tarayip DI'a kaydediyor - yeni bir validator eklendiginde
+// buraya elle satir eklemeye gerek yok, assembly taramasi otomatik buluyor.
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskRequestValidator>();
+
+// [ApiController]'in zaten yaptigi otomatik model-binding dogrulamasina
+// FluentValidation kurallarini da dahil ediyor - validator basarisiz olursa
+// controller koduna hic girmeden 400 + ProblemDetails donuyor.
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 
