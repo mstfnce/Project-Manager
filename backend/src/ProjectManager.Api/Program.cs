@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ProjectManager.Api.Middleware;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
 using ProjectManager.Infrastructure.Data;
@@ -41,6 +42,9 @@ builder.Services.AddScoped<NoteService>();
 // var olan IProjectRepository/ITaskRepository'yi kullaniyor.
 builder.Services.AddScoped<DashboardService>();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -66,6 +70,8 @@ builder.Services.AddControllers()
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // ---- HTTP pipeline (istekler bu sıradan geçer) ----
 
