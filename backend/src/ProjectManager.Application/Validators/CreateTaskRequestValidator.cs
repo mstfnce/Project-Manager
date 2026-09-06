@@ -20,5 +20,13 @@ public class CreateTaskRequestValidator : AbstractValidator<CreateTaskRequest>
         RuleFor(x => x.Priority)
             .Must(EnumValidationExtensions.IsValidEnumValue<TaskPriority>)
             .WithMessage("Gecersiz oncelik degeri.");
+
+        // DueDate nullable oldugu icin .When ile sadece deger varsa kontrol ediyoruz -
+        // bos DueDate zaten gecerli bir durum. .Date ile saat kismini atiyoruz,
+        // yoksa "bugun ama birkac saat once" bile hatali sayilirdi.
+        RuleFor(x => x.DueDate)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Date)
+            .When(x => x.DueDate.HasValue)
+            .WithMessage("Son tarih gecmis olamaz.");
     }
 }

@@ -21,5 +21,12 @@ public class UpdateTaskRequestValidator : AbstractValidator<UpdateTaskRequest>
         RuleFor(x => x.Status)
             .Must(EnumValidationExtensions.IsValidEnumValue<WorkItemStatus>)
             .WithMessage("Gecersiz gorev durumu.");
+
+        // CreateTaskRequestValidator ile ayni kural: DueDate nullable, sadece
+        // deger varsa kontrol ediyoruz.
+        RuleFor(x => x.DueDate)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Date)
+            .When(x => x.DueDate.HasValue)
+            .WithMessage("Son tarih gecmis olamaz.");
     }
 }
