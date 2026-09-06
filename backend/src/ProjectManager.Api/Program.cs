@@ -37,6 +37,10 @@ builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<NoteService>();
 
+// Dashboard icin yeni bir repository gerekmiyor - DashboardService zaten
+// var olan IProjectRepository/ITaskRepository'yi kullaniyor.
+builder.Services.AddScoped<DashboardService>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

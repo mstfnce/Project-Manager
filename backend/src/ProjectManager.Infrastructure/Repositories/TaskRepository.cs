@@ -20,6 +20,11 @@ public class TaskRepository : ITaskRepository
             .OrderBy(t => t.Order)
             .ToListAsync();
 
+    public async Task<IReadOnlyList<TaskItem>> GetAllAsync() =>
+    await _db.Tasks
+            .Include(t => t.Project)
+            .ToListAsync();
+
     public Task<TaskItem?> GetByIdAsync(int id) =>
         _db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
 

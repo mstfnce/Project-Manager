@@ -7,6 +7,8 @@ public interface ITaskRepository
     // 1. Bir projenin tüm görevlerini listele
     Task<IReadOnlyList<TaskItem>> GetAllByProjectAsync(int projectId);
 
+    Task<IReadOnlyList<TaskItem>> GetAllAsync();   // YENİ - dashboard için tüm projelerdeki görevler
+
     // 2. Tek Getir (Id ile getir - bulunamayabileceği için nullable)
     Task<TaskItem?> GetByIdAsync(int id);
 
