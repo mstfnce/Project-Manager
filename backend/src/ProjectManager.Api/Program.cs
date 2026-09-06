@@ -34,6 +34,9 @@ builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<TaskService>();
 
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<NoteService>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
