@@ -21,3 +21,6 @@ dist/
 
 # ---- Log ----
 *.log
+
+# ---- graphify ----
+graphify-out/
