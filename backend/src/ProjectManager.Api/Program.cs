@@ -82,6 +82,20 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskRequestValidator>
 // controller koduna hic girmeden 400 + ProblemDetails donuyor.
 builder.Services.AddFluentValidationAutoValidation();
 
+// Frontend (localhost:5173) farkli portta calistigi icin tarayici bu istekleri
+// varsayilan olarak engeller - CORS policy'siyle izin veriyoruz.
+// Sadece development icin; Docker'a gecince (Bolum 11) ayni origin'den servis
+// edilecekleri icin bu sorun kalmayacak.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -94,6 +108,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
