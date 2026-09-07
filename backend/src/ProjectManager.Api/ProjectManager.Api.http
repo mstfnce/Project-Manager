@@ -1,6 +1,107 @@
-@ProjectManager.Api_HostAddress = http://localhost:5259
+@baseUrl = http://localhost:5259
+@token = BURAYA_LOGIN_SONRASI_TOKEN_YAPISTIR
 
-GET {{ProjectManager.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### ===== AUTH =====
 
-###
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "test@test.com", "password": "Test1234!" }
+
+### ===== PROJECTS =====
+
+### Tum projeleri listele
+GET {{baseUrl}}/api/projects
+Authorization: Bearer {{token}}
+
+### Yeni proje olustur
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "name": "Ornek Proje", "description": "aciklama", "techStack": ["dotnet"], "repositoryUrl": null }
+
+### Tek proje getir
+GET {{baseUrl}}/api/projects/1
+Authorization: Bearer {{token}}
+
+### Proje guncelle
+PUT {{baseUrl}}/api/projects/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "name": "Guncellenmis Proje", "description": "yeni aciklama", "techStack": ["dotnet"], "repositoryUrl": null, "status": "Active" }
+
+### Proje sil
+DELETE {{baseUrl}}/api/projects/1
+Authorization: Bearer {{token}}
+
+### ===== TASKS =====
+
+### Projenin gorevlerini listele
+GET {{baseUrl}}/api/projects/1/tasks
+Authorization: Bearer {{token}}
+
+### Tek gorev getir
+GET {{baseUrl}}/api/tasks/1
+Authorization: Bearer {{token}}
+
+### Yeni gorev olustur
+POST {{baseUrl}}/api/projects/1/tasks
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "title": "Ornek Gorev", "description": null, "priority": "Medium", "dueDate": null }
+
+### Gorev guncelle
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "title": "Guncellenmis Gorev", "description": null, "priority": "High", "status": "InProgress", "dueDate": null }
+
+### Gorev durumu degistir (kanban)
+PATCH {{baseUrl}}/api/tasks/1/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "Done" }
+
+### Gorev sil
+DELETE {{baseUrl}}/api/tasks/1
+Authorization: Bearer {{token}}
+
+### ===== NOTES =====
+
+### Projenin notlarini listele
+GET {{baseUrl}}/api/projects/1/notes
+Authorization: Bearer {{token}}
+
+### Tek not getir
+GET {{baseUrl}}/api/notes/1
+Authorization: Bearer {{token}}
+
+### Yeni not olustur
+POST {{baseUrl}}/api/projects/1/notes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "title": "Ornek Not", "content": "icerik", "type": "Decision", "tags": ["auth"] }
+
+### Not guncelle
+PUT {{baseUrl}}/api/notes/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "title": "Guncellenmis Not", "content": "yeni icerik", "type": "Learning", "tags": ["ef-core"] }
+
+### Not sil
+DELETE {{baseUrl}}/api/notes/1
+Authorization: Bearer {{token}}
+
+### ===== DASHBOARD =====
+
+### Ozet getir
+GET {{baseUrl}}/api/dashboard/summary
+Authorization: Bearer {{token}}
