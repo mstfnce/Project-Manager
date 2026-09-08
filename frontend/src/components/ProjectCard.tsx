@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from 'lucide-react'
 import type { ProjectResponse, ProjectStatus } from '@/types/project'
 
 // Her durumun rozet rengi - Stitch tasarimindaki pill stiline uyarlandi
@@ -15,18 +16,38 @@ interface ProjectCardProps {
   // Kart, hangi projeyi gosterecegini disaridan (ProjectListPage'den) alir -
   // kendisi backend'e istek atmaz, sadece kendine verilen veriyi gosterir.
   project: ProjectResponse
+  // Kart kendi basina duzenleme/silme yapmaz, sadece "bu proje icin
+  // butona basildi" diye ust sayfaya haber verir.
+  onEdit: (project: ProjectResponse) => void
+  onDelete: (project: ProjectResponse) => void
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-2 flex items-start justify-between gap-2">
         <h3 className="font-semibold text-slate-900">{project.name}</h3>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status]}`}
-        >
-          {project.status}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onEdit(project)}
+            className="text-slate-400 hover:text-slate-700"
+          >
+            <Pencil className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(project)}
+            className="text-slate-400 hover:text-red-600"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status]}`}
+          >
+            {project.status}
+          </span>
+        </div>
       </div>
 
       {project.description && (
