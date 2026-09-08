@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { ProjectResponse, ProjectStatus } from '@/types/project'
 
 // Her durumun rozet rengi - Stitch tasarimindaki pill stiline uyarlandi
@@ -24,20 +25,35 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    // Kartin tamami artik proje detay sayfasina link - Link bir <a> etiketine
+    // derlendigi icin dis div yerine Link'in kendisi disari kart stilini tasiyor.
+    <Link
+      to={`/projects/${project.id}`}
+      className="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
       <div className="mb-2 flex items-start justify-between gap-2">
         <h3 className="font-semibold text-slate-900">{project.name}</h3>
         <div className="flex shrink-0 items-center gap-2">
+          {/* stopPropagation olmasaydi bu butonlara tiklamak da Link'in
+              click event'ine "kabarir" (bubble) ve detay sayfasina yonlendirirdi. */}
           <button
             type="button"
-            onClick={() => onEdit(project)}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              onEdit(project)
+            }}
             className="text-slate-400 hover:text-slate-700"
           >
             <Pencil className="size-3.5" />
           </button>
           <button
             type="button"
-            onClick={() => onDelete(project)}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              onDelete(project)
+            }}
             className="text-slate-400 hover:text-red-600"
           >
             <Trash2 className="size-3.5" />
@@ -71,6 +87,6 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
         <span>{project.taskCount} görev</span>
         <span>{project.noteCount} not</span>
       </div>
-    </div>
+    </Link>
   )
 }

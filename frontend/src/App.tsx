@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
+import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { ProjectListPage } from "./pages/ProjectListPage";
 
 function App() {
@@ -33,6 +34,17 @@ function App() {
         element={
           <ProtectedRoute>
             <ProjectListPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Proje detay sayfasi - ":id" URL'den okunup ProjectDetailPage icinde
+          useParams ile alinacak, o projenin kendisini ve gorevlerini getirir. */}
+      <Route
+        path="/projects/:id"
+        element={
+          <ProtectedRoute>
+            <ProjectDetailPage />
           </ProtectedRoute>
         }
       />

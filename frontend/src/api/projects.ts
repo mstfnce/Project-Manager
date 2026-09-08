@@ -12,6 +12,13 @@ export function getProjects() {
   return apiClient.get<ProjectResponse[]>("/projects");
 }
 
+// GET /api/projects/{id} - tek bir projeyi getirir.
+// ProjectDetailPage bu fonksiyonu cagiracak - liste sayfasindan farkli olarak
+// tek bir proje + o projenin gorevleri birlikte gosterilecek.
+export function getProjectById(id: number) {
+  return apiClient.get<ProjectResponse>(`/projects/${id}`);
+}
+
 // POST /api/projects - yeni proje olusturur
 export function createProject(data: CreateProjectRequest) {
   return apiClient.post<ProjectResponse>("/projects", data);
