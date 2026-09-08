@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import { DashboardPage } from './pages/DashboardPage'
-import { LoginPage } from './pages/LoginPage'
+import { Navigate, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { DashboardPage } from "./pages/DashboardPage";
+import { LoginPage } from "./pages/LoginPage";
+import { ProjectListPage } from "./pages/ProjectListPage";
 
 function App() {
   return (
@@ -25,8 +26,18 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Proje listesi - Dashboard ile ayni sekilde ProtectedRoute ile sarili. */}
+      <Route
+        path="/projects"
+        element={
+          <ProtectedRoute>
+            <ProjectListPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;
