@@ -54,7 +54,7 @@ public class TaskService
             Description = request.Description,
             Status = WorkItemStatus.Todo,   // yeni görev her zaman Todo sütununda doğar
             Priority = Enum.Parse<TaskPriority>(request.Priority),
-            DueDate = request.DueDate,
+            DueDate = ToUtc(request.DueDate),
             Order = await NextOrderAsync(projectId),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -74,7 +74,7 @@ public class TaskService
         task.Title = request.Title;
         task.Description = request.Description;
         task.Priority = Enum.Parse<TaskPriority>(request.Priority);
-        task.DueDate = request.DueDate;
+        task.DueDate = ToUtc(request.DueDate);
         ApplyStatus(task, Enum.Parse<WorkItemStatus>(request.Status));
         task.UpdatedAt = DateTime.UtcNow;
 
@@ -130,6 +130,14 @@ public class TaskService
 
         task.Status = newStatus;
     }
+
+    // JSON'dan gelen DueDate, saat dilimi bilgisi (Z/offset) icermiyorsa
+    // Kind=Unspecified olarak deserialize edilir. Postgres'teki
+    // "timestamp with time zone" sutunu ise sadece Kind=Utc kabul eder,
+    // aksi halde Npgsql yazarken hata firlatir. Burada Kind'i acikca Utc
+    // yapiyoruz - gercek bir saat donusumu degil, sadece etiketleme.
+    private static DateTime? ToUtc(DateTime? dueDate) =>
+        dueDate is null ? null : DateTime.SpecifyKind(dueDate.Value, DateTimeKind.Utc);
 
     // Yeni görev listenin sonuna eklensin diye bir sonraki Order değerini bulur.
     // Projede hiç görev yoksa 0, varsa en yüksek Order + 1.
