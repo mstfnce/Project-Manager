@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getProjectById } from '@/api/projects'
 import { getTasksByProject } from '@/api/tasks'
 import { KanbanBoard } from '@/components/KanbanBoard'
+import { TaskListView } from '@/components/TaskListView'
 
 export function ProjectDetailPage() {
   // URL'den (/projects/:id) proje id'sini okur - route tanimindaki ":id"
@@ -10,6 +12,9 @@ export function ProjectDetailPage() {
   // API cagrisi icin Number()'a ceviriyoruz.
   const { id } = useParams<{ id: string }>()
   const projectId = Number(id)
+
+  // Hangi gorunum secili - Kanban mi Duz Liste mi.
+  const [view, setView] = useState<'kanban' | 'list'>('kanban')
 
   const { data: projectData, isLoading: isProjectLoading, error: projectError } = useQuery({
     queryKey: ['project', projectId],
@@ -22,11 +27,11 @@ export function ProjectDetailPage() {
   })
 
   if (isProjectLoading) {
-    return <div className="p-8 text-slate-500">Yükleniyor...</div>
+    return <div className="p-8 text-muted-foreground">Yükleniyor...</div>
   }
 
   if (projectError) {
-    return <div className="p-8 text-red-600">Proje yüklenemedi.</div>
+    return <div className="p-8 text-destructive">Proje yüklenemedi.</div>
   }
 
   const project = projectData?.data
@@ -35,9 +40,9 @@ export function ProjectDetailPage() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">{project?.name}</h1>
+        <h1 className="text-xl font-semibold text-foreground">{project?.name}</h1>
         {project?.description && (
-          <p className="mt-1 text-sm text-slate-500">{project.description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{project.description}</p>
         )}
 
         {project && project.techStack.length > 0 && (
@@ -45,7 +50,7 @@ export function ProjectDetailPage() {
             {project.techStack.map((tech) => (
               <span
                 key={tech}
-                className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
+                className="rounded-lg bg-muted px-2 py-0.5 text-xs text-muted-foreground"
               >
                 {tech}
               </span>
@@ -54,10 +59,39 @@ export function ProjectDetailPage() {
         )}
       </div>
 
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex gap-1 rounded-xl bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setView('kanban')}
+            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+              view === 'kanban'
+                ? 'bg-card text-primary shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Kanban
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('list')}
+            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+              view === 'list'
+                ? 'bg-card text-primary shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Düz Liste
+          </button>
+        </div>
+      </div>
+
       {isTasksLoading ? (
-        <p className="text-slate-500">Görevler yükleniyor...</p>
-      ) : (
+        <p className="text-muted-foreground">Görevler yükleniyor...</p>
+      ) : view === 'kanban' ? (
         <KanbanBoard tasks={tasks} projectId={projectId} />
+      ) : (
+        <TaskListView tasks={tasks} projectId={projectId} />
       )}
     </div>
   )

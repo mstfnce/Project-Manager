@@ -19,6 +19,7 @@ export interface TaskResponse {
   order: number
   createdAt: string
   updatedAt: string
+  parentTaskId: number | null   // null = ana gorev, doluysa alt gorev
 }
 
 // POST /api/projects/{projectId}/tasks bu sekli bekliyor - Status yok,
@@ -28,6 +29,7 @@ export interface CreateTaskRequest {
   description?: string | null
   priority: TaskPriorityLevel
   dueDate?: string | null
+  parentTaskId?: number | null
 }
 
 // PUT /api/tasks/{id} bu sekli bekliyor - Create'ten farki Status'un da
@@ -38,6 +40,7 @@ export interface UpdateTaskRequest {
   priority: TaskPriorityLevel
   status: TaskStatus
   dueDate?: string | null
+  parentTaskId?: number | null
 }
 
 // PATCH /api/tasks/{id}/status bu sekli bekliyor - kanban'da kart baska bir

@@ -19,4 +19,9 @@ public class TaskItem
     public DateTime UpdatedAt { get; set; }
 
     public Project Project { get; set; } = null!;   // navigation property
+
+    public int? ParentTaskId { get; set; }   // null = ana görev, doluysa bir alt görev
+
+    public TaskItem? ParentTask { get; set; }        // ust gorev (ana gorevse null)
+    public List<TaskItem> SubTasks { get; set; } = [];  // alt gorevler (ana gorev degilse hep bos)
 }

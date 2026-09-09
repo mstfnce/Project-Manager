@@ -1,15 +1,16 @@
 import { useDraggable } from '@dnd-kit/core'
 import type { TaskPriorityLevel, TaskResponse } from '@/types/task'
 
-// Her onceligin rozet rengi - ProjectCard'daki statusColors ile ayni desen.
-const priorityColors: Record<TaskPriorityLevel, string> = {
-  Low: 'bg-slate-100 text-slate-600',
-  Medium: 'bg-blue-100 text-blue-700',
-  High: 'bg-amber-100 text-amber-700',
-  Critical: 'bg-red-100 text-red-700',
+// Her onceligin rozet rengi - Takip tasarim sistemindeki hex degerlerle
+// birebir (ProjectCard'daki statusColors ile ayni desen/gerekce).
+export const priorityColors: Record<TaskPriorityLevel, string> = {
+  Low: 'bg-[#EEF1F5] text-[#52606D]',
+  Medium: 'bg-[#E5F0FA] text-[#2C5A82]',
+  High: 'bg-[#FBEEDD] text-[#A05A16]',
+  Critical: 'bg-[#FCE7EA] text-[#A3283F]',
 }
 
-const priorityLabels: Record<TaskPriorityLevel, string> = {
+export const priorityLabels: Record<TaskPriorityLevel, string> = {
   Low: 'Düşük',
   Medium: 'Orta',
   High: 'Yüksek',
@@ -39,7 +40,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {...listeners}
       {...attributes}
       onClick={() => onClick(task)}
-      className={`rounded-xl border border-slate-200 bg-white p-3 shadow-sm ${isDragging ? 'opacity-50' : ''}`}
+      className={`rounded-xl border border-border bg-card p-3 shadow-sm ${isDragging ? 'opacity-50' : ''}`}
     >
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span
@@ -49,14 +50,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         </span>
       </div>
 
-      <h4 className="text-sm font-medium text-slate-900">{task.title}</h4>
+      <h4 className="text-sm font-medium text-foreground">{task.title}</h4>
 
       {task.description && (
-        <p className="mt-1 text-xs text-slate-500">{task.description}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{task.description}</p>
       )}
 
       {task.dueDate && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-muted-foreground">
           {new Date(task.dueDate).toLocaleDateString('tr-TR')}
         </p>
       )}

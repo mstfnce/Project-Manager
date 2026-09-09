@@ -7,12 +7,11 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { TaskCard } from '@/components/TaskCard'
 import { TaskFormModal } from '@/components/TaskFormModal'
 import { Button } from '@/components/ui/button'
-import { updateTaskStatus } from '@/api/tasks'
+import { useUpdateTaskStatus } from '@/hooks/useUpdateTaskStatus'
 import type { TaskResponse, TaskStatus } from '@/types/task'
 
 // Sutun sirasi ve Turkce basliklar burada tanimli - backend'deki
@@ -40,18 +39,18 @@ function KanbanColumn({ status, title, tasks, onTaskClick }: KanbanColumnProps) 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col gap-3 rounded-lg p-2 ${isOver ? 'bg-slate-50' : ''}`}
+      className={`flex flex-col gap-3 rounded-lg p-2 ${isOver ? 'bg-muted' : ''}`}
     >
-      <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
         {title}
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
           {tasks.length}
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
         {tasks.length === 0 ? (
-          <p className="text-xs text-slate-400">Görev yok</p>
+          <p className="text-xs text-muted-foreground">Görev yok</p>
         ) : (
           tasks.map((task) => <TaskCard key={task.id} task={task} onClick={onTaskClick} />)
         )}
@@ -66,8 +65,6 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
-  const queryClient = useQueryClient()
-
   // Modal acik mi, ve hangi gorev duzenleniyor (null = "yeni gorev ekle" modu).
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskResponse | null>(null)
@@ -90,50 +87,14 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   )
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: TaskStatus }) =>
-      updateTaskStatus(id, { status }),
+  // Kanban sadece ana gorevleri gosterir - alt gorevler (parentTaskId dolu
+  // olanlar) sadece Duz Liste'de gorunur, bu yuzden board'a girmeden once
+  // eleniyor.
+  const mainTasks = tasks.filter((task) => task.parentTaskId === null)
 
-    // Istek gitmeden ONCE calisir - once ekrani guncelliyoruz (optimistic update).
-    onMutate: async ({ id, status }) => {
-      const queryKey = ['tasks', projectId]
-
-      // Bu anahtarla devam eden bir fetch varsa iptal et - yoksa o fetch
-      // bizim optimistic guncellememizin ustune eski veriyi yazabilir.
-      await queryClient.cancelQueries({ queryKey })
-
-      // Hata olursa geri donebilmek icin mevcut veriyi yedekle.
-      const previousTasks = queryClient.getQueryData(queryKey)
-
-      // Cache'i hemen yeni status ile guncelle - kullanici kartin
-      // tasindigini aninda gorur, API cevabini beklemez.
-      queryClient.setQueryData(
-        queryKey,
-        (old: { data: TaskResponse[] } | undefined) => {
-          if (!old) return old
-          return {
-            ...old,
-            data: old.data.map((task) => (task.id === id ? { ...task, status } : task)),
-          }
-        },
-      )
-
-      return { previousTasks }
-    },
-
-    // Istek basarisiz olursa, onMutate'de yedeklenen veriye geri don.
-    onError: (_err, _variables, context) => {
-      if (context?.previousTasks) {
-        queryClient.setQueryData(['tasks', projectId], context.previousTasks)
-      }
-    },
-
-    // Basarili da olsa basarisiz da olsa, sunucudaki gercek veriyle senkron
-    // olmak icin sorguyu tekrar calistir.
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] })
-    },
-  })
+  // Optimistic update mantigi artik ortak hook'ta - TaskListView de ayni
+  // hook'u kullanacak, kod tekrari olmasin diye.
+  const statusMutation = useUpdateTaskStatus(projectId)
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -165,7 +126,7 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
               key={column.status}
               status={column.status}
               title={column.title}
-              tasks={tasks.filter((task) => task.status === column.status)}
+              tasks={mainTasks.filter((task) => task.status === column.status)}
               onTaskClick={handleTaskClick}
             />
           ))}

@@ -18,4 +18,5 @@ public record TaskResponse(
     DateTime? CompletedAt,
     int Order,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    int? ParentTaskId);   // null = ana gorev, doluysa bu bir alt gorev

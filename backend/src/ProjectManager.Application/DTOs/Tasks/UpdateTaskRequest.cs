@@ -12,4 +12,5 @@ public record UpdateTaskRequest(
     string? Description,
     string Priority,
     string Status,
-    DateTime? DueDate);
+    DateTime? DueDate,
+    int? ParentTaskId);

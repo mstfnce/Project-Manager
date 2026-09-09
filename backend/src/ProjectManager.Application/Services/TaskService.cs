@@ -47,6 +47,18 @@ public class TaskService
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project is null) return null;
 
+        // ParentTaskId gonderildiyse: o gorev gercekten var mi, AYNI projede mi,
+        // ve kendisi de bir alt gorev DEGIL mi (sadece tek seviye ic ice gecis
+        // destekleniyor - bir alt gorevin altina bir daha alt gorev eklenemez).
+        if (request.ParentTaskId is not null)
+        {
+            var parent = await _taskRepository.GetByIdAsync(request.ParentTaskId.Value);
+            if (parent is null || parent.ProjectId != projectId || parent.ParentTaskId is not null)
+            {
+                return null;
+            }
+        }
+
         var task = new TaskItem
         {
             ProjectId = projectId,
@@ -55,6 +67,7 @@ public class TaskService
             Status = WorkItemStatus.Todo,   // yeni görev her zaman Todo sütununda doğar
             Priority = Enum.Parse<TaskPriority>(request.Priority),
             DueDate = ToUtc(request.DueDate),
+            ParentTaskId = request.ParentTaskId,
             Order = await NextOrderAsync(projectId),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -71,10 +84,25 @@ public class TaskService
         var task = await _taskRepository.GetByIdAsync(id);
         if (task is null) return null;
 
+        // ParentTaskId gonderildiyse: kendi kendinin ustu olamaz, o gorev
+        // gercekten var mi, AYNI projede mi, ve kendisi de bir alt gorev
+        // DEGIL mi (CreateAsync'teki ile ayni uc kural).
+        if (request.ParentTaskId is not null)
+        {
+            if (request.ParentTaskId == id) return null;
+
+            var parent = await _taskRepository.GetByIdAsync(request.ParentTaskId.Value);
+            if (parent is null || parent.ProjectId != task.ProjectId || parent.ParentTaskId is not null)
+            {
+                return null;
+            }
+        }
+
         task.Title = request.Title;
         task.Description = request.Description;
         task.Priority = Enum.Parse<TaskPriority>(request.Priority);
         task.DueDate = ToUtc(request.DueDate);
+        task.ParentTaskId = request.ParentTaskId;
         ApplyStatus(task, Enum.Parse<WorkItemStatus>(request.Status));
         task.UpdatedAt = DateTime.UtcNow;
 
@@ -154,5 +182,6 @@ public class TaskService
             task.Id, task.ProjectId, task.Title, task.Description,
             task.Status.ToString(), task.Priority.ToString(),
             task.DueDate, task.CompletedAt, task.Order,
-            task.CreatedAt, task.UpdatedAt);
+            task.CreatedAt, task.UpdatedAt,
+            task.ParentTaskId);
 }
