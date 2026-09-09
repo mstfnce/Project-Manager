@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -14,26 +15,32 @@ function App() {
           dogrudan login'e yonlendirilir. */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Login sayfasi - herkese acik, koruma yok. */}
+      {/* Login sayfasi - herkese acik, koruma yok, Layout'suz (sidebar yok). */}
       <Route path="/login" element={<LoginPage />} />
 
       {/* Dashboard'a girmeden once ProtectedRoute araya girer:
-          token yoksa DashboardPage hic render edilmeden /login'e atilir. */}
+          token yoksa DashboardPage hic render edilmeden /login'e atilir.
+          Layout, ProtectedRoute'un icinde - token yoksa Sidebar bile
+          render edilmez, sidebar'daki proje sorgusu bosuna atilmaz. */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <Layout>
+              <DashboardPage />
+            </Layout>
           </ProtectedRoute>
         }
       />
 
-      {/* Proje listesi - Dashboard ile ayni sekilde ProtectedRoute ile sarili. */}
+      {/* Proje listesi - Dashboard ile ayni sekilde ProtectedRoute + Layout ile sarili. */}
       <Route
         path="/projects"
         element={
           <ProtectedRoute>
-            <ProjectListPage />
+            <Layout>
+              <ProjectListPage />
+            </Layout>
           </ProtectedRoute>
         }
       />
@@ -44,7 +51,9 @@ function App() {
         path="/projects/:id"
         element={
           <ProtectedRoute>
-            <ProjectDetailPage />
+            <Layout>
+              <ProjectDetailPage />
+            </Layout>
           </ProtectedRoute>
         }
       />

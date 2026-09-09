@@ -55,11 +55,11 @@ export function ProjectListPage() {
   }
 
   if (isLoading) {
-    return <div className="p-8 text-slate-500">Yükleniyor...</div>;
+    return <div className="p-8 text-muted-foreground">Yükleniyor...</div>;
   }
 
   if (error) {
-    return <div className="p-8 text-red-600">Projeler yüklenemedi.</div>;
+    return <div className="p-8 text-destructive">Projeler yüklenemedi.</div>;
   }
 
   const projects = data?.data ?? [];
@@ -67,12 +67,12 @@ export function ProjectListPage() {
   return (
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Projeler</h1>
+        <h1 className="text-xl font-semibold text-foreground">Projeler</h1>
         <Button onClick={handleCreateClick}>+ Yeni Proje</Button>
       </div>
 
       {projects.length === 0 ? (
-        <div className="text-slate-500">Henüz proje yok.</div>
+        <div className="text-muted-foreground">Henüz proje yok.</div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (

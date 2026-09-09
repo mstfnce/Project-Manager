@@ -23,6 +23,10 @@ export function LoginPage() {
       const body: LoginRequest = { email, password }
       const response = await apiClient.post<AuthResponse>('/auth/login', body)
       localStorage.setItem('token', response.data.token)
+      // DisplayName ve Email'i de sakliyoruz - Sidebar'daki profil kutusu
+      // bunlari her sayfa yuklemesinde tekrar login isteği atmadan gosterebilsin diye.
+      localStorage.setItem('displayName', response.data.displayName)
+      localStorage.setItem('email', response.data.email)
       navigate('/dashboard')
     } catch {
       // Backend 401 donerse (yanlis email/sifre) buraya duser.
@@ -33,15 +37,15 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm"
       >
-        <h1 className="mb-6 text-xl font-semibold text-slate-900">Giris Yap</h1>
+        <h1 className="mb-6 text-xl font-semibold text-foreground">Giris Yap</h1>
 
         <div className="mb-4">
-          <label htmlFor="email" className="mb-1.5 block text-sm text-slate-600">
+          <label htmlFor="email" className="mb-1.5 block text-sm text-muted-foreground">
             E-posta
           </label>
           <Input
@@ -54,7 +58,7 @@ export function LoginPage() {
         </div>
 
         <div className="mb-6">
-          <label htmlFor="password" className="mb-1.5 block text-sm text-slate-600">
+          <label htmlFor="password" className="mb-1.5 block text-sm text-muted-foreground">
             Sifre
           </label>
           <Input
@@ -66,7 +70,7 @@ export function LoginPage() {
           />
         </div>
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? 'Giris yapiliyor...' : 'Giris Yap'}
