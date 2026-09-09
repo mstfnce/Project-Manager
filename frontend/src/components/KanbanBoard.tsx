@@ -1,6 +1,17 @@
-import { DndContext, useDroppable, type DragEndEvent } from '@dnd-kit/core'
+import { useState } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 import { TaskCard } from '@/components/TaskCard'
+import { TaskFormModal } from '@/components/TaskFormModal'
+import { Button } from '@/components/ui/button'
 import { updateTaskStatus } from '@/api/tasks'
 import type { TaskResponse, TaskStatus } from '@/types/task'
 
@@ -17,12 +28,13 @@ interface KanbanColumnProps {
   status: TaskStatus
   title: string
   tasks: TaskResponse[]
+  onTaskClick: (task: TaskResponse) => void
 }
 
 // Sutunu ayri bir component yapmamizin sebebi: useDroppable bir hook, hook'lar
 // sadece component govdesinde cagrilabilir - columns.map(...) icinde satir
 // arasinda dogrudan cagiramayiz.
-function KanbanColumn({ status, title, tasks }: KanbanColumnProps) {
+function KanbanColumn({ status, title, tasks, onTaskClick }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
@@ -41,7 +53,7 @@ function KanbanColumn({ status, title, tasks }: KanbanColumnProps) {
         {tasks.length === 0 ? (
           <p className="text-xs text-slate-400">Görev yok</p>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} />)
+          tasks.map((task) => <TaskCard key={task.id} task={task} onClick={onTaskClick} />)
         )}
       </div>
     </div>
@@ -55,6 +67,28 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
   const queryClient = useQueryClient()
+
+  // Modal acik mi, ve hangi gorev duzenleniyor (null = "yeni gorev ekle" modu).
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<TaskResponse | null>(null)
+
+  function handleAddClick() {
+    setEditingTask(null)
+    setIsModalOpen(true)
+  }
+
+  function handleTaskClick(task: TaskResponse) {
+    setEditingTask(task)
+    setIsModalOpen(true)
+  }
+
+  // PointerSensor, fare/parmak 8 piksel hareket etmeden surukleme baslatmaz.
+  // Bu sayede kisa bir tiklama "surukleme" sayilmiyor, TaskCard'daki onClick
+  // normal calisabiliyor - sensor olmasaydi her tiklama surukleme gibi
+  // algilanip karta tiklayarak duzenleme acmak imkansiz olurdu.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: TaskStatus }) =>
@@ -116,17 +150,38 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {columns.map((column) => (
-          <KanbanColumn
-            key={column.status}
-            status={column.status}
-            title={column.title}
-            tasks={tasks.filter((task) => task.status === column.status)}
-          />
-        ))}
+    <>
+      <div className="mb-4 flex justify-end">
+        <Button onClick={handleAddClick} className="gap-1.5">
+          <Plus className="size-4" />
+          Görev Ekle
+        </Button>
       </div>
-    </DndContext>
+
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {columns.map((column) => (
+            <KanbanColumn
+              key={column.status}
+              status={column.status}
+              title={column.title}
+              tasks={tasks.filter((task) => task.status === column.status)}
+              onTaskClick={handleTaskClick}
+            />
+          ))}
+        </div>
+      </DndContext>
+
+      {/* key={editingTask?.id ?? 'create'} - ProjectFormModal'daki numaranin
+          aynisi: farkli bir goreve gecince ya da "ekle"ye donunce formun
+          eski degerleri kalmasin diye component'i sifirdan mount ediyoruz. */}
+      <TaskFormModal
+        key={editingTask?.id ?? 'create'}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        task={editingTask}
+        projectId={projectId}
+      />
+    </>
   )
 }

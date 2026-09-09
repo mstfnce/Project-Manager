@@ -18,9 +18,12 @@ const priorityLabels: Record<TaskPriorityLevel, string> = {
 
 interface TaskCardProps {
   task: TaskResponse
+  // Karta tiklaninca (surukleme degil, normal tik) ust componente
+  // "bu gorev tiklandi" diye haber verir - duzenleme modalini acmak icin.
+  onClick: (task: TaskResponse) => void
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, onClick }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   })
@@ -35,6 +38,7 @@ export function TaskCard({ task }: TaskCardProps) {
       style={style}
       {...listeners}
       {...attributes}
+      onClick={() => onClick(task)}
       className={`rounded-xl border border-slate-200 bg-white p-3 shadow-sm ${isDragging ? 'opacity-50' : ''}`}
     >
       <div className="mb-1.5 flex items-center justify-between gap-2">
