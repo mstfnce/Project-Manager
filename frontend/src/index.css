@@ -42,11 +42,21 @@
   --sidebar-accent-foreground: #0B1C30;
   --sidebar-border: #DFE5ED;
   --sidebar-ring: #1E2A4A;
+
+  /* Mockup'ta (docs/design mockup'lari) olup shadcn token setinde karsiligi
+     olmayan uc renk. --accent shadcn'de "rozet arkaplani" anlaminda kullanildigi
+     icin, mockup'taki mavimsi gri YAZI rengini ayri bir token olarak tutuyoruz. */
+  --brand: #44617E;    /* eyebrow yazisi, etiket yazisi, ikonlar */
+  --faint: #8A8B92;    /* placeholder / en soluk yazi */
+  --heading: #081534;  /* buyuk sayfa basliklari */
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
+  --color-brand: var(--brand);
+  --color-faint: var(--faint);
+  --color-heading: var(--heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

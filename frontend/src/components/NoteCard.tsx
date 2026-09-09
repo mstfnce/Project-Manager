@@ -31,7 +31,7 @@ export function NoteCard({ note, isSelected, onClick }: NoteCardProps) {
     <button
       type="button"
       onClick={() => onClick(note)}
-      className={`flex flex-col gap-1.5 rounded-xl border bg-card p-3 text-left shadow-sm ${
+      className={`flex h-full flex-col gap-1.5 rounded-xl border bg-card p-3 text-left shadow-sm ${
         isSelected ? 'border-primary ring-1 ring-primary/20' : 'border-border'
       }`}
     >

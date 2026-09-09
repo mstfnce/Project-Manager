@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import { deleteNote, getNotesByProject } from '@/api/notes'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { NoteCard, noteTypeColors, noteTypeLabels } from '@/components/NoteCard'
 import { NoteFormModal } from '@/components/NoteFormModal'
 import type { NoteResponse, NoteType } from '@/types/note'
@@ -20,12 +21,15 @@ const typeFilters: { value: NoteType | 'All'; label: string }[] = [
 
 interface NoteListViewProps {
   projectId: number
+  // Global Notlar sayfasindan "Projeye git" ile gelindiyse, hangi notun
+  // secili olarak acilacagi (adresteki ?note=12 parametresinden).
+  initialNoteId?: number | null
 }
 
 // Kanban/Duz Liste'nin aksine notlar 'tasks' cache'iyle hic karismiyor
 // (bkz. docs/planlar/not-listesi-roadmap.md karar 1) - kendi useQuery'sini
 // burada, kendi icinde tutuyor, sadece bu sekme acikken fetch ediliyor.
-export function NoteListView({ projectId }: NoteListViewProps) {
+export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -35,9 +39,13 @@ export function NoteListView({ projectId }: NoteListViewProps) {
   const notes = data?.data ?? []
 
   const [typeFilter, setTypeFilter] = useState<NoteType | 'All'>('All')
-  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null)
+  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(
+    initialNoteId ?? null,
+  )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<NoteResponse | null>(null)
+  // Silme onayi bekleyen not - doluysa ConfirmDialog acik demek.
+  const [deletingNote, setDeletingNote] = useState<NoteResponse | null>(null)
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteNote(id),
@@ -63,11 +71,17 @@ export function NoteListView({ projectId }: NoteListViewProps) {
     setIsModalOpen(true)
   }
 
-  function handleDelete(note: NoteResponse) {
-    if (window.confirm(`"${note.title}" notunu silmek istediğinize emin misiniz?`)) {
-      deleteMutation.mutate(note.id)
-      if (selectedNoteId === note.id) setSelectedNoteId(null)
-    }
+  // Cop kutusu sadece onay kutusunu aciyor, silme islemi kullanici
+  // onaylayinca ConfirmDialog'un onConfirm'unde yapiliyor.
+  function handleDeleteClick(note: NoteResponse) {
+    setDeletingNote(note)
+  }
+
+  function handleDeleteConfirm() {
+    if (!deletingNote) return
+
+    deleteMutation.mutate(deletingNote.id)
+    if (selectedNoteId === deletingNote.id) setSelectedNoteId(null)
   }
 
   if (isLoading) {
@@ -142,7 +156,7 @@ export function NoteListView({ projectId }: NoteListViewProps) {
               </button>
               <button
                 type="button"
-                onClick={() => handleDelete(selectedNote)}
+                onClick={() => handleDeleteClick(selectedNote)}
                 className="text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="size-4" />
@@ -197,6 +211,14 @@ export function NoteListView({ projectId }: NoteListViewProps) {
         onOpenChange={setIsModalOpen}
         note={editingNote}
         projectId={projectId}
+      />
+
+      <ConfirmDialog
+        open={deletingNote !== null}
+        onOpenChange={(open) => !open && setDeletingNote(null)}
+        title="Notu sil"
+        description={`"${deletingNote?.title}" notu kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   )

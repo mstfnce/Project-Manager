@@ -111,7 +111,7 @@ export function ProjectFormModal({ open, onOpenChange, project }: ProjectFormMod
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : handleClose())}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <div className="mb-1 flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-lg bg-primary">
