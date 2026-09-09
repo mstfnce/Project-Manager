@@ -29,6 +29,16 @@ public class NotesController : ControllerBase
         return Ok(notes);                        // proje var, liste boş da olabilir
     }
 
+    // GET /api/notes - tum projelerdeki notlar (global Notlar sayfasi).
+    // Proje bazli olan GetAllByProject'ten farki: proje kontrolu yok, o yuzden
+    // 404 ihtimali de yok - hic not yoksa bos liste 200 ile doner.
+    [HttpGet("/api/notes")]
+    public async Task<IActionResult> GetAll()
+    {
+        var notes = await _noteService.GetAllAsync();
+        return Ok(notes);
+    }
+
     // GET /api/notes/{id}
     [HttpGet("/api/notes/{id}")]
     public async Task<IActionResult> GetById(int id)

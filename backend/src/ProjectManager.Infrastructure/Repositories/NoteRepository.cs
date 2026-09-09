@@ -20,6 +20,17 @@ public class NoteRepository : INoteRepository
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
 
+    // Tum projelerdeki notlar - global Notlar sayfasi icin.
+    // Include(n => n.Project): listede "hangi projeye ait" rozetini
+    // gosterecegiz, o yuzden projenin kendisini de beraberinde cekiyoruz
+    // (TaskRepository.GetAllAsync ile ayni gerekce).
+    // OrderByDescending: en yeni not en ustte.
+    public async Task<IReadOnlyList<Note>> GetAllAsync() =>
+        await _db.Notes
+            .Include(n => n.Project)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+
     public Task<Note?> GetByIdAsync(int id) =>
         _db.Notes.FirstOrDefaultAsync(t => t.Id == id);
 

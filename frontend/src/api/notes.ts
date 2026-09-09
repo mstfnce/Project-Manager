@@ -1,9 +1,19 @@
 import { apiClient } from './client'
-import type { CreateNoteRequest, NoteResponse, UpdateNoteRequest } from '@/types/note'
+import type {
+  CreateNoteRequest,
+  NoteResponse,
+  NoteWithProjectResponse,
+  UpdateNoteRequest,
+} from '@/types/note'
 
 // GET /api/projects/{projectId}/notes - bir projenin tum notlarini listeler.
 export function getNotesByProject(projectId: number) {
   return apiClient.get<NoteResponse[]>(`/projects/${projectId}/notes`)
+}
+
+// GET /api/notes - tum projelerdeki notlar (global Notlar sayfasi).
+export function getAllNotes() {
+  return apiClient.get<NoteWithProjectResponse[]>('/notes')
 }
 
 // POST /api/projects/{projectId}/notes - yeni not olusturur.

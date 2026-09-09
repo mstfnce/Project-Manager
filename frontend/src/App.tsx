@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
+import { NotesPage } from "./pages/NotesPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { ProjectListPage } from "./pages/ProjectListPage";
 
@@ -40,6 +41,18 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <ProjectListPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Global Notlar sayfasi - tum projelerin notlari bir arada. */}
+      <Route
+        path="/notes"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <NotesPage />
             </Layout>
           </ProtectedRoute>
         }

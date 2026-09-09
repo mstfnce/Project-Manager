@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { getProjectById } from '@/api/projects'
 import { getTasksByProject } from '@/api/tasks'
 import { KanbanBoard } from '@/components/KanbanBoard'
@@ -14,8 +14,13 @@ export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const projectId = Number(id)
 
-  // Hangi gorunum secili - Kanban, Duz Liste ya da Notlar.
-  const [view, setView] = useState<'kanban' | 'list' | 'notes'>('kanban')
+  // Global Notlar sayfasindan "Projeye git" ile gelindiginde adres
+  // /projects/5?tab=notes&note=12 seklinde olur - o zaman Kanban yerine
+  // dogrudan Notlar sekmesiyle acilip o not seciliyor.
+  const [searchParams] = useSearchParams()
+  const [view, setView] = useState<'kanban' | 'list' | 'notes'>(
+    searchParams.get('tab') === 'notes' ? 'notes' : 'kanban',
+  )
 
   const { data: projectData, isLoading: isProjectLoading, error: projectError } = useQuery({
     queryKey: ['project', projectId],
@@ -113,7 +118,10 @@ export function ProjectDetailPage() {
       ) : (
         // NoteListView, tasks cache'inden bagimsiz kendi verisini kendi
         // icinde cekiyor - isTasksLoading burada anlamsiz.
-        <NoteListView projectId={projectId} />
+        <NoteListView
+          projectId={projectId}
+          initialNoteId={Number(searchParams.get('note')) || null}
+        />
       )}
     </div>
   )

@@ -4,6 +4,8 @@ namespace ProjectManager.Application.Interfaces;
 
 public interface INoteRepository
 {
+    Task<IReadOnlyList<Note>> GetAllAsync();   // YENİ - global notlar sayfası için tüm projelerdeki notlar
+
     // 1. Bir projenin tüm notlarını listele
     Task<IReadOnlyList<Note>> GetAllByProjectAsync(int projectId);
 

@@ -30,6 +30,15 @@ public class NoteService
         return notes.Select(ToResponse).ToList();
     }
 
+    // Tum projelerdeki notlar - global Notlar sayfasi icin.
+    // Burada "proje var mi" kontrolu yok, cunku belirli bir projeye
+    // bagli degiliz; hic not yoksa bos liste donuyor, null degil.
+    public async Task<IReadOnlyList<NoteWithProjectResponse>> GetAllAsync()
+    {
+        var notes = await _noteRepository.GetAllAsync();
+        return notes.Select(ToResponseWithProject).ToList();
+    }
+
     // Id ile tek not getirir. Bulunamazsa null (Controller 404'e çevirir).
     public async Task<NoteResponse?> GetByIdAsync(int id)
     {
@@ -90,5 +99,12 @@ public class NoteService
 
     private static NoteResponse ToResponse(Note note) =>
         new(note.Id, note.ProjectId, note.Title, note.Content,
+            note.Type.ToString(), note.Tags, note.CreatedAt, note.UpdatedAt);
+
+    // NoteResponse'un ProjectName'li hali. note.Project burada null degil,
+    // cunku NoteRepository.GetAllAsync() .Include(n => n.Project) ile cekiyor -
+    // o Include olmasaydi navigation property doldurulmamis (null) gelirdi.
+    private static NoteWithProjectResponse ToResponseWithProject(Note note) =>
+        new(note.Id, note.ProjectId, note.Project.Name, note.Title, note.Content,
             note.Type.ToString(), note.Tags, note.CreatedAt, note.UpdatedAt);
 }

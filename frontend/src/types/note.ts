@@ -14,6 +14,13 @@ export interface NoteResponse {
   updatedAt: string
 }
 
+// GET /api/notes bu sekli donuyor - NoteResponse ile ayni, sadece hangi
+// projeye ait oldugunu gosteren projectName fazladan geliyor. Backend'deki
+// NoteWithProjectResponse.cs record'una birebir karsilik gelir.
+export interface NoteWithProjectResponse extends NoteResponse {
+  projectName: string
+}
+
 // POST /api/projects/{projectId}/notes bu sekli bekliyor - ProjectId
 // URL'den geliyor, Id/CreatedAt/UpdatedAt backend'de uretiliyor.
 export interface CreateNoteRequest {

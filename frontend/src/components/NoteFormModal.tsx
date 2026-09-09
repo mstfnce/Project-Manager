@@ -2,9 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { StickyNote, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { createNote, updateNote } from '@/api/notes'
+import { getProjects } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -34,6 +35,9 @@ const noteFormSchema = z.object({
   title: z.string().min(1, 'Başlık boş olamaz'),
   content: z.string().min(1, 'İçerik boş olamaz'),
   type: z.enum(typeOptions),
+  // <select> her zaman string dondurur ("3"), sayiya cevirmeyi gonderirken
+  // yapiyoruz. Bos string = kullanici henuz proje secmedi.
+  projectId: z.string().min(1, 'Proje seçin'),
 })
 
 type NoteFormValues = z.infer<typeof noteFormSchema>
@@ -44,7 +48,9 @@ interface NoteFormModalProps {
   // Doluysa "duzenle" modu (formu bu notun verisiyle onceden doldurur),
   // bos/undefined ise "olustur" modu - ProjectFormModal'daki ayni mantik.
   note?: NoteResponse | null
-  projectId: number
+  // Proje sayfasindan aciliyorsa doludur (not o projeye eklenir), global
+  // Notlar sayfasindan aciliyorsa bostur - o zaman formda proje secici cikar.
+  projectId?: number
 }
 
 export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormModalProps) {
@@ -52,6 +58,15 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
 
   const [tags, setTags] = useState<string[]>(note?.tags ?? [])
   const [tagInput, setTagInput] = useState('')
+
+  // Proje secici icin liste - sadece projectId verilmediginde gorunuyor ama
+  // sorgu her durumda calisiyor; sidebar zaten ayni anahtari kullandigi icin
+  // React Query cache'ten donuyor, ekstra istek olmuyor.
+  const { data: projectsData } = useQuery({
+    queryKey: ['projects'],
+    queryFn: getProjects,
+  })
+  const projects = projectsData?.data ?? []
 
   const {
     register,
@@ -64,17 +79,24 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
       title: note?.title ?? '',
       content: note?.content ?? '',
       type: note?.type ?? 'General',
+      // Duzenlemede notun kendi projesi, proje sayfasinda prop'tan gelen
+      // proje, global sayfada bos (kullanici secene kadar zod hata verir).
+      projectId: String(note?.projectId ?? projectId ?? ''),
     },
   })
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
-    mutationFn: (values: NoteFormValues) =>
+    // projectId'yi ayirip aliyoruz: istek govdesinde yeri yok (backend'de
+    // ProjectId URL'den geliyor), sadece hangi projeye ekleyecegimizi soyluyor.
+    mutationFn: ({ projectId: selectedProjectId, ...values }: NoteFormValues) =>
       note
         ? updateNote(note.id, { ...values, tags })
-        : createNote(projectId, { ...values, tags }),
+        : createNote(Number(selectedProjectId), { ...values, tags }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes', projectId] })
+      // ['notes'] onek olarak eslesiyor - hem proje-ici liste (['notes', 5])
+      // hem global liste (['notes', 'all']) birden tazeleniyor.
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
       handleClose()
     },
   })
@@ -116,11 +138,40 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
             <DialogTitle>{isEditMode ? 'Notu Düzenle' : 'Yeni Not Ekle'}</DialogTitle>
           </div>
           <DialogDescription>
-            {isEditMode ? 'Not bilgilerini güncelleyin.' : 'Bu projeye yeni bir not ekleyin.'}
+            {isEditMode ? 'Not bilgilerini güncelleyin.' : 'Yeni bir not ekleyin.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Proje secici sadece projectId prop'u verilmediginde gorunur -
+              global Notlar sayfasindan aciliyorsa hangi projeye eklenecegi
+              belli degil, sormamiz gerekiyor. */}
+          {!projectId && !isEditMode && (
+            <div>
+              <label
+                htmlFor="projectId"
+                className="mb-1.5 block text-sm font-medium text-foreground"
+              >
+                Proje
+              </label>
+              <select
+                id="projectId"
+                {...register('projectId')}
+                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
+              >
+                <option value="">Proje seçin...</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              {errors.projectId && (
+                <p className="mt-1 text-sm text-destructive">{errors.projectId.message}</p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-foreground">
