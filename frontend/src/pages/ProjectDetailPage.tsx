@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { getProjectById } from '@/api/projects'
 import { getTasksByProject } from '@/api/tasks'
 import { KanbanBoard } from '@/components/KanbanBoard'
+import { NoteListView } from '@/components/NoteListView'
 import { TaskListView } from '@/components/TaskListView'
 
 export function ProjectDetailPage() {
@@ -13,8 +14,8 @@ export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const projectId = Number(id)
 
-  // Hangi gorunum secili - Kanban mi Duz Liste mi.
-  const [view, setView] = useState<'kanban' | 'list'>('kanban')
+  // Hangi gorunum secili - Kanban, Duz Liste ya da Notlar.
+  const [view, setView] = useState<'kanban' | 'list' | 'notes'>('kanban')
 
   const { data: projectData, isLoading: isProjectLoading, error: projectError } = useQuery({
     queryKey: ['project', projectId],
@@ -59,39 +60,60 @@ export function ProjectDetailPage() {
         )}
       </div>
 
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex gap-1 rounded-xl bg-muted p-1">
-          <button
-            type="button"
-            onClick={() => setView('kanban')}
-            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-              view === 'kanban'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Kanban
-          </button>
-          <button
-            type="button"
-            onClick={() => setView('list')}
-            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-              view === 'list'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Düz Liste
-          </button>
-        </div>
+      {/* Ayri cerceveli butonlar - aktif olan dolu lacivert, digerleri
+          beyaz/cerceveli (Mustafa'nin onayladigi mockup stili). */}
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setView('kanban')}
+          className={`rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition-colors ${
+            view === 'kanban'
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Kanban
+        </button>
+        <button
+          type="button"
+          onClick={() => setView('list')}
+          className={`rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition-colors ${
+            view === 'list'
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Düz Liste
+        </button>
+        <button
+          type="button"
+          onClick={() => setView('notes')}
+          className={`rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition-colors ${
+            view === 'notes'
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Notlar
+        </button>
       </div>
 
-      {isTasksLoading ? (
-        <p className="text-muted-foreground">Görevler yükleniyor...</p>
-      ) : view === 'kanban' ? (
-        <KanbanBoard tasks={tasks} projectId={projectId} />
+      {view === 'kanban' ? (
+        isTasksLoading ? (
+          <p className="text-muted-foreground">Görevler yükleniyor...</p>
+        ) : (
+          <KanbanBoard tasks={tasks} projectId={projectId} />
+        )
+      ) : view === 'list' ? (
+        isTasksLoading ? (
+          <p className="text-muted-foreground">Görevler yükleniyor...</p>
+        ) : (
+          <TaskListView tasks={tasks} projectId={projectId} />
+        )
       ) : (
-        <TaskListView tasks={tasks} projectId={projectId} />
+        // NoteListView, tasks cache'inden bagimsiz kendi verisini kendi
+        // icinde cekiyor - isTasksLoading burada anlamsiz.
+        <NoteListView projectId={projectId} />
       )}
     </div>
   )
