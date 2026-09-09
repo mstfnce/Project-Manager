@@ -1,3 +1,4 @@
+import { useDraggable } from '@dnd-kit/core'
 import type { TaskPriorityLevel, TaskResponse } from '@/types/task'
 
 // Her onceligin rozet rengi - ProjectCard'daki statusColors ile ayni desen.
@@ -20,8 +21,22 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task }: TaskCardProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.id,
+  })
+
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`rounded-xl border border-slate-200 bg-white p-3 shadow-sm ${isDragging ? 'opacity-50' : ''}`}
+    >
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${priorityColors[task.priority]}`}

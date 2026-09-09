@@ -57,7 +57,7 @@ export function ProjectDetailPage() {
       {isTasksLoading ? (
         <p className="text-slate-500">Görevler yükleniyor...</p>
       ) : (
-        <KanbanBoard tasks={tasks} />
+        <KanbanBoard tasks={tasks} projectId={projectId} />
       )}
     </div>
   )
