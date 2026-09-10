@@ -29,6 +29,29 @@ const typeFilters: { value: NoteType | 'All'; label: string }[] = [
   { value: 'General', label: 'Genel' },
 ]
 
+// Onizleme icin markdown isaretlerini soken kucuk temizleyici. Icerigi
+// react-markdown ile render etmiyoruz (2 satira kirpilmis HTML bozuk
+// gorunurdu), ama ham haliyle de "### Baslik", "**kalin**", "- [ ]" gibi
+// isaretler ekrana dusuyordu - burada onlari ayikliyoruz.
+function toPlainPreview(content: string) {
+  return content
+    .replace(/```[\s\S]*?```/g, ' ') // kod bloklari
+    .replace(/`([^`]+)`/g, '$1') // satir ici kod
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // resimler
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // linkler -> sadece metni
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '') // ### basliklar
+    .replace(/^\s*>\s?/gm, '') // alinti isareti
+    .replace(/^\s*[-*+]\s+\[[ xX]\]\s*/gm, '') // - [ ] checkbox maddeleri
+    .replace(/^\s*\[[ xX]\]\s*/gm, '') // basinda tire olmayan [ ] isaretleri
+    .replace(/^\s*[-*+]\s+/gm, '') // madde isaretleri
+    .replace(/^\s*\d+\.\s+/gm, '') // 1. numarali liste
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // kalin
+    .replace(/\*([^*]+)\*/g, '$1') // italik
+    .replace(/~~([^~]+)~~/g, '$1') // ustu cizili
+    .replace(/\s+/g, ' ') // tum satir sonu/bosluklar tek bosluk
+    .trim()
+}
+
 interface NoteActionDialogProps {
   note: NoteWithProjectResponse | null
   onOpenChange: (open: boolean) => void
@@ -77,8 +100,10 @@ interface NoteContentDialogProps {
 function NoteContentDialog({ note, onOpenChange }: NoteContentDialogProps) {
   return (
     <Dialog open={note !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="p-6 sm:max-w-4xl">
+        {/* Baslik blogu icerikten ince bir cizgiyle ayriliyor - uzun notlarda
+            baslik ile metin birbirine karisiyordu. */}
+        <DialogHeader className="border-b border-border pb-4">
           <div className="mb-1 flex items-center gap-2">
             {note && (
               <span
@@ -89,11 +114,13 @@ function NoteContentDialog({ note, onOpenChange }: NoteContentDialogProps) {
             )}
             <span className="text-xs text-muted-foreground">{note?.projectName}</span>
           </div>
-          <DialogTitle>{note?.title}</DialogTitle>
+          <DialogTitle className="text-lg">{note?.title}</DialogTitle>
         </DialogHeader>
 
+        {/* Cok uzun notlarda modal ekrani asmasin diye icerik kendi icinde
+            kayiyor; pr-1 ise kaydirma cubugunun yaziya yapismasini onluyor. */}
         <div
-          className="text-sm text-muted-foreground
+          className="max-h-[60vh] overflow-y-auto pr-1 text-sm text-muted-foreground
             [&_h1]:mt-3 [&_h1]:mb-1.5 [&_h1]:text-base [&_h1]:font-bold [&_h1]:text-foreground
             [&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-foreground
             [&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-foreground
@@ -269,9 +296,10 @@ export function NotesPage() {
               <div className="text-[15px] font-bold text-heading">{note.title}</div>
 
               {/* Onizlemede markdown render etmiyoruz - 2 satira kirpilmis HTML
-                  bozuk gorunurdu, ham metnin ilk satirlari yeterli. */}
+                  bozuk gorunurdu; onun yerine isaretleri soküp duz metin
+                  gosteriyoruz (bkz. toPlainPreview). */}
               <p className="line-clamp-2 max-w-[88ch] text-[13px] leading-relaxed text-muted-foreground">
-                {note.content}
+                {toPlainPreview(note.content)}
               </p>
 
               {note.tags.length > 0 && (

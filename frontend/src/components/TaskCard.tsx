@@ -1,4 +1,5 @@
 import { useDraggable } from '@dnd-kit/core'
+import { CalendarDays, CheckCircle2, ListChecks } from 'lucide-react'
 import type { TaskPriorityLevel, TaskResponse } from '@/types/task'
 
 // Her onceligin rozet rengi - Takip tasarim sistemindeki hex degerlerle
@@ -17,14 +18,24 @@ export const priorityLabels: Record<TaskPriorityLevel, string> = {
   Critical: 'Kritik',
 }
 
+// "18 Eki" gibi kisa tarih - kart dar oldugu icin 10.09.2026 yerine bunu
+// kullaniyoruz, referans tasarimda da boyle.
+function formatShortDate(value: string) {
+  return new Date(value).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })
+}
+
 interface TaskCardProps {
   task: TaskResponse
   // Karta tiklaninca (surukleme degil, normal tik) ust componente
   // "bu gorev tiklandi" diye haber verir - duzenleme modalini acmak icin.
   onClick: (task: TaskResponse) => void
+  // Alt gorev ilerlemesi ("2/5"). Hesabi KanbanBoard yapiyor cunku alt
+  // gorevlerin tam listesi orada; kart sadece gelen sayilari basiyor.
+  subTaskTotal: number
+  subTaskDone: number
 }
 
-export function TaskCard({ task, onClick }: TaskCardProps) {
+export function TaskCard({ task, onClick, subTaskTotal, subTaskDone }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   })
@@ -33,6 +44,12 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined
 
+  const isDone = task.status === 'Done'
+
+  // Teslim tarihi gecmisse tarihi kirmizi gosteriyoruz - ama gorev zaten
+  // bittiyse gecikmenin anlami kalmiyor, o yuzden isDone kontrolu de var.
+  const isOverdue = !isDone && task.dueDate !== null && new Date(task.dueDate) < new Date()
+
   return (
     <div
       ref={setNodeRef}
@@ -40,26 +57,69 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {...listeners}
       {...attributes}
       onClick={() => onClick(task)}
-      className={`rounded-xl border border-border bg-card p-3 shadow-sm ${isDragging ? 'opacity-50' : ''}`}
+      // hover'da kartin bir tik yukari kalkmasi, sutun zemininden ayrildigi
+      // hissini veriyor - referans tasarimdaki davranis.
+      className={`flex cursor-pointer flex-col gap-3 rounded-xl bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+        isDragging ? 'opacity-50' : ''
+      }`}
     >
-      <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${priorityColors[task.priority]}`}
-        >
-          {priorityLabels[task.priority]}
-        </span>
+      <div className="flex flex-wrap items-center gap-2">
+        {isDone ? (
+          // Biten gorevde oncelik rozeti artik bilgi tasimiyor - yerine
+          // "Tamamlandı" rozeti koyuyoruz.
+          <span className="flex items-center gap-1 rounded-md bg-[#E1F3E9] px-2 py-0.5 text-[11px] font-bold text-[#1E7A4C]">
+            <CheckCircle2 className="size-3" />
+            Tamamlandı
+          </span>
+        ) : (
+          <span
+            className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${priorityColors[task.priority]}`}
+          >
+            {priorityLabels[task.priority]}
+          </span>
+        )}
+
+        {subTaskTotal > 0 && (
+          <span className="flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+            <ListChecks className="size-3" />
+            {subTaskDone}/{subTaskTotal}
+          </span>
+        )}
       </div>
 
-      <h4 className="text-sm font-medium text-foreground">{task.title}</h4>
+      <div className="flex flex-col gap-1">
+        <h4
+          className={`text-[15px] font-semibold leading-snug ${
+            isDone ? 'text-muted-foreground line-through' : 'text-heading'
+          }`}
+        >
+          {task.title}
+        </h4>
 
-      {task.description && (
-        <p className="mt-1 text-xs text-muted-foreground">{task.description}</p>
-      )}
+        {task.description && (
+          // line-clamp-2: uzun aciklama karti sismesin, iki satirda kesilsin.
+          <p className="line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
+            {task.description}
+          </p>
+        )}
+      </div>
 
-      {task.dueDate && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          {new Date(task.dueDate).toLocaleDateString('tr-TR')}
-        </p>
+      {isDone && task.completedAt ? (
+        <span className="flex w-fit items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-[11.5px] font-semibold text-brand">
+          <CheckCircle2 className="size-3.5" />
+          {formatShortDate(task.completedAt)} bitti
+        </span>
+      ) : (
+        task.dueDate && (
+          <span
+            className={`flex items-center gap-1.5 text-[11.5px] font-semibold ${
+              isOverdue ? 'text-destructive' : 'text-muted-foreground'
+            }`}
+          >
+            <CalendarDays className="size-3.5" />
+            {formatShortDate(task.dueDate)}
+          </span>
+        )
       )}
     </div>
   )

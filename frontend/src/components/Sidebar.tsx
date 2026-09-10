@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
-  BarChart3,
   ChevronDown,
   FolderKanban,
   LayoutDashboard,
@@ -20,9 +19,10 @@ export function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // "Projeler" linki tiklaninca acilip kapanan bir accordion - baslangicta
-  // acik, cunku zaten projelerle ilgili bir sayfadaysak listeyi hemen gormek isteriz.
-  const [isProjectsOpen, setIsProjectsOpen] = useState(true)
+  // Proje alt listesi kapali basliyor; sadece "Projeler" satirindaki ok
+  // ikonuyla acilip kapaniyor. Yaziya tiklamak listeyi acmiyor, dogrudan
+  // /projects sayfasina goturuyor.
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false)
 
   // Sidebar katlanmis mi? Her route kendi Layout'unu render ettigi icin sayfa
   // degisince bu component yeniden mount oluyor - tercih kaybolmasin diye
@@ -113,7 +113,6 @@ export function Sidebar() {
         <Link
           to="/projects"
           title="Projeler"
-          onClick={() => setIsProjectsOpen(true)}
           className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-semibold transition-colors ${
             isCollapsed ? 'justify-center' : 'justify-between'
           } ${
@@ -178,22 +177,6 @@ export function Sidebar() {
           {!isCollapsed && 'Notlar'}
         </Link>
 
-        <div
-          title="Analiz (yakında)"
-          className={`flex cursor-default items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-semibold text-sidebar-foreground/40 ${
-            isCollapsed ? 'justify-center' : 'justify-between'
-          }`}
-        >
-          <span className="flex items-center gap-2.5">
-            <BarChart3 className="size-[17px] shrink-0" />
-            {!isCollapsed && 'Analiz'}
-          </span>
-          {!isCollapsed && (
-            <span className="rounded-full bg-sidebar-accent px-1.5 py-0.5 text-[9.5px] font-bold tracking-wide text-sidebar-foreground/50">
-              YAKINDA
-            </span>
-          )}
-        </div>
       </nav>
 
       <div className="flex flex-col gap-1">

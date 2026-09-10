@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Check, Plus } from 'lucide-react'
 import { createTask } from '@/api/tasks'
 import { priorityColors, priorityLabels } from '@/components/TaskCard'
-import { TaskFormModal } from '@/components/TaskFormModal'
 import { useUpdateTaskStatus } from '@/hooks/useUpdateTaskStatus'
 import type { TaskResponse, TaskStatus } from '@/types/task'
 
@@ -73,11 +72,13 @@ function SubtaskAddRow({ parentId, projectId }: SubtaskAddRowProps) {
 interface TaskListViewProps {
   tasks: TaskResponse[]
   projectId: number
+  // Alttaki kesikli "Görev ekle" butonu ust sayfadaki modali aciyor - gorev
+  // modali artik ProjectDetailPage'de duruyor.
+  onAddTask: () => void
 }
 
-export function TaskListView({ tasks, projectId }: TaskListViewProps) {
+export function TaskListView({ tasks, projectId, onAddTask }: TaskListViewProps) {
   const statusMutation = useUpdateTaskStatus(projectId)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const mainTasks = tasks.filter((task) => task.parentTaskId === null)
 
@@ -173,20 +174,12 @@ export function TaskListView({ tasks, projectId }: TaskListViewProps) {
           cizgili, en altta, yeni bir "blok" (ana gorev) eklemeye davet ediyor. */}
       <button
         type="button"
-        onClick={() => setIsModalOpen(true)}
+        onClick={onAddTask}
         className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border p-3 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary"
       >
         <Plus className="size-4" />
         Görev ekle
       </button>
-
-      <TaskFormModal
-        key="create-main-task"
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        task={null}
-        projectId={projectId}
-      />
     </div>
   )
 }

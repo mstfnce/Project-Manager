@@ -12,15 +12,15 @@
 :root {
   --background: #F8F9FF;
   --foreground: #0B1C30;
-  --card: #F5F7FA;
+  --card: #FFFFFF;
   --card-foreground: #0B1C30;
-  --popover: #F5F7FA;
+  --popover: #FFFFFF;
   --popover-foreground: #0B1C30;
   --primary: #1E2A4A;
   --primary-foreground: #FFFFFF;
-  --secondary: #EBF1F7;
+  --secondary: #EFF4FF;
   --secondary-foreground: #1E2A4A;
-  --muted: #EBF1F7;
+  --muted: #EFF4FF;
   --muted-foreground: #45464E;
   --accent: #DCE9FF;
   --accent-foreground: #1E2A4A;
@@ -34,11 +34,11 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.75rem;
-  --sidebar: #F4F6F9;
+  --sidebar: #FFFFFF;
   --sidebar-foreground: #0B1C30;
   --sidebar-primary: #1E2A4A;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F7FA;
+  --sidebar-accent: #EFF4FF;
   --sidebar-accent-foreground: #0B1C30;
   --sidebar-border: #DFE5ED;
   --sidebar-ring: #1E2A4A;
@@ -91,8 +91,10 @@
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
+  /* Referans tasarimdaki degerlere sabitlendi - carpanla hesaplaninca
+     (1.4x / 1.8x) kartlar fazla yuvarlak kaliyordu. */
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }

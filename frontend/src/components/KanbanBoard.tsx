@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -9,50 +8,93 @@ import {
 } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 import { TaskCard } from '@/components/TaskCard'
-import { TaskFormModal } from '@/components/TaskFormModal'
-import { Button } from '@/components/ui/button'
 import { useUpdateTaskStatus } from '@/hooks/useUpdateTaskStatus'
 import type { TaskResponse, TaskStatus } from '@/types/task'
 
-// Sutun sirasi ve Turkce basliklar burada tanimli - backend'deki
+// Sutun sirasi, Turkce basliklar ve baslikta duran renkli nokta - backend'deki
 // WorkItemStatus enum sirasiyla birebir ayni (Todo -> InProgress -> Blocked -> Done).
-const columns: { status: TaskStatus; title: string }[] = [
-  { status: 'Todo', title: 'Yapılacak' },
-  { status: 'InProgress', title: 'Devam Ediyor' },
-  { status: 'Blocked', title: 'Bloke' },
-  { status: 'Done', title: 'Tamamlandı' },
+const columns: { status: TaskStatus; title: string; dotColor: string }[] = [
+  { status: 'Todo', title: 'Yapılacak', dotColor: 'bg-[#8A8B92]' },
+  { status: 'InProgress', title: 'Devam Ediyor', dotColor: 'bg-[#1E2A4A]' },
+  { status: 'Blocked', title: 'Bloke', dotColor: 'bg-[#BA1A1A]' },
+  { status: 'Done', title: 'Tamamlandı', dotColor: 'bg-[#A9C7E8]' },
 ]
 
 interface KanbanColumnProps {
   status: TaskStatus
   title: string
+  dotColor: string
   tasks: TaskResponse[]
+  // Bir gorevin alt gorevleri - kartta "2/5" ilerlemesini gostermek icin.
+  allTasks: TaskResponse[]
   onTaskClick: (task: TaskResponse) => void
+  onAddTask: () => void
 }
 
 // Sutunu ayri bir component yapmamizin sebebi: useDroppable bir hook, hook'lar
 // sadece component govdesinde cagrilabilir - columns.map(...) icinde satir
 // arasinda dogrudan cagiramayiz.
-function KanbanColumn({ status, title, tasks, onTaskClick }: KanbanColumnProps) {
+function KanbanColumn({
+  status,
+  title,
+  dotColor,
+  tasks,
+  allTasks,
+  onTaskClick,
+  onAddTask,
+}: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col gap-3 rounded-lg p-2 ${isOver ? 'bg-muted' : ''}`}
+      // Sutunun kendi mavi zemini var (ana sayfa zemininden koyu); surukleme
+      // sirasindaki "buraya birakabilirsin" isareti bu yuzden arka plan degil,
+      // cerceve halkasi.
+      className={`flex min-h-[580px] flex-col gap-3.5 rounded-2xl bg-muted p-3.5 transition-shadow ${
+        isOver ? 'ring-2 ring-primary/25' : ''
+      }`}
     >
-      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        {title}
-        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-          {tasks.length}
-        </span>
+      <div className="flex items-center justify-between px-1.5 pt-1">
+        <div className="flex items-center gap-2">
+          <span className={`size-2.5 rounded-full ${dotColor}`} />
+          <h2 className="text-[15px] font-bold text-heading">{title}</h2>
+          <span className="rounded-full bg-card px-2 py-0.5 text-xs font-bold text-muted-foreground">
+            {tasks.length}
+          </span>
+        </div>
+
+        {/* "+" sadece Yapilacak sutununda: backend yeni gorevi her zaman Todo
+            ile aciyor, diger sutunlarda buton olsa gorev yine buraya duserdi. */}
+        {status === 'Todo' && (
+          <button
+            type="button"
+            onClick={onAddTask}
+            title="Görev ekle"
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+          >
+            <Plus className="size-[18px]" />
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {tasks.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Görev yok</p>
+          <p className="px-1.5 text-xs text-muted-foreground">Görev yok</p>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} onClick={onTaskClick} />)
+          tasks.map((task) => {
+            const subTasks = allTasks.filter((t) => t.parentTaskId === task.id)
+
+            return (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onClick={onTaskClick}
+                subTaskTotal={subTasks.length}
+                subTaskDone={subTasks.filter((t) => t.status === 'Done').length}
+              />
+            )
+          })
         )}
       </div>
     </div>
@@ -62,23 +104,14 @@ function KanbanColumn({ status, title, tasks, onTaskClick }: KanbanColumnProps) 
 interface KanbanBoardProps {
   tasks: TaskResponse[]
   projectId: number
+  // Bir karta tiklaninca ust sayfaya haber verir - gorev modali artik
+  // ProjectDetailPage'de duruyor ("Görev Ekle" butonu sekmelerin yaninda).
+  onEditTask: (task: TaskResponse) => void
+  // "Yapılacak" sutunundaki "+" butonu da ayni modali aciyor.
+  onAddTask: () => void
 }
 
-export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
-  // Modal acik mi, ve hangi gorev duzenleniyor (null = "yeni gorev ekle" modu).
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<TaskResponse | null>(null)
-
-  function handleAddClick() {
-    setEditingTask(null)
-    setIsModalOpen(true)
-  }
-
-  function handleTaskClick(task: TaskResponse) {
-    setEditingTask(task)
-    setIsModalOpen(true)
-  }
-
+export function KanbanBoard({ tasks, projectId, onEditTask, onAddTask }: KanbanBoardProps) {
   // PointerSensor, fare/parmak 8 piksel hareket etmeden surukleme baslatmaz.
   // Bu sayede kisa bir tiklama "surukleme" sayilmiyor, TaskCard'daki onClick
   // normal calisabiliyor - sensor olmasaydi her tiklama surukleme gibi
@@ -111,38 +144,21 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
   }
 
   return (
-    <>
-      <div className="mb-4 flex justify-end">
-        <Button onClick={handleAddClick} className="gap-1.5">
-          <Plus className="size-4" />
-          Görev Ekle
-        </Button>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.status}
+            status={column.status}
+            title={column.title}
+            dotColor={column.dotColor}
+            tasks={mainTasks.filter((task) => task.status === column.status)}
+            allTasks={tasks}
+            onTaskClick={onEditTask}
+            onAddTask={onAddTask}
+          />
+        ))}
       </div>
-
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {columns.map((column) => (
-            <KanbanColumn
-              key={column.status}
-              status={column.status}
-              title={column.title}
-              tasks={mainTasks.filter((task) => task.status === column.status)}
-              onTaskClick={handleTaskClick}
-            />
-          ))}
-        </div>
-      </DndContext>
-
-      {/* key={editingTask?.id ?? 'create'} - ProjectFormModal'daki numaranin
-          aynisi: farkli bir goreve gecince ya da "ekle"ye donunce formun
-          eski degerleri kalmasin diye component'i sifirdan mount ediyoruz. */}
-      <TaskFormModal
-        key={editingTask?.id ?? 'create'}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        task={editingTask}
-        projectId={projectId}
-      />
-    </>
+    </DndContext>
   )
 }
