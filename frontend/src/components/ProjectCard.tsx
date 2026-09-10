@@ -65,9 +65,12 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   const StatusIcon = statusIcons[project.status]
 
-  // Backend'de henuz CompletedTaskCount alani yok - bu alan eklenene kadar
-  // yuzde hesaplanamiyor, cubuk hep %0 gosterecek (bkz. ROADMAP 7.2).
-  const completionPercent = 0
+  // Gorev yoksa 0'a bolmemek icin ozel durum - alt gorevler de sayiliyor,
+  // "proje %X bitti" tanimimiz bu (bkz. ROADMAP, Bolum 8).
+  const completionPercent =
+    project.taskCount === 0
+      ? 0
+      : Math.round((project.completedTaskCount / project.taskCount) * 100)
 
   return (
     // Kartin tamami proje detay sayfasina link - Link bir <a> etiketine
@@ -143,7 +146,11 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
           ve altindaki alt bilgi hep en alta yaslanip hizali kaliyor. */}
       <div className="mt-auto">
         <div className="mb-1.5 flex items-center justify-between text-[11.8px] font-bold text-muted-foreground">
-          <span>{project.taskCount} açık görev</span>
+          {/* "acik gorev" degil "3/8 gorev": taskCount butun gorevleri sayiyor,
+              acik olanlari degil - yanindaki yuzdeyle de boyle tutarli. */}
+          <span>
+            {project.completedTaskCount}/{project.taskCount} görev
+          </span>
           <span className="text-[13px] text-heading">%{completionPercent}</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-accent">

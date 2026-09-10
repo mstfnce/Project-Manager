@@ -11,10 +11,20 @@ public class ProjectRepository : IProjectRepository
     private readonly AppDbContext _db;
     public ProjectRepository(AppDbContext db) => _db = db;
 
-    public async Task<IReadOnlyList<Project>> GetAllAsync() => await _db.Projects.ToListAsync();
+    // Include: EF Core ilişkili tabloları kendiliğinden getirmez, açıkça
+    // istemek gerekir. Tasks/Notes'u getirmezsek ProjectResponse'taki
+    // TaskCount/NoteCount her zaman 0 çıkar (liste boş kalır).
+    public async Task<IReadOnlyList<Project>> GetAllAsync() =>
+        await _db.Projects
+            .Include(p => p.Tasks)
+            .Include(p => p.Notes)
+            .ToListAsync();
 
     public Task<Project?> GetByIdAsync(int id) =>
-        _db.Projects.FirstOrDefaultAsync(p => p.Id == id);
+        _db.Projects
+            .Include(p => p.Tasks)
+            .Include(p => p.Notes)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
     public async Task AddAsync(Project project)
     {

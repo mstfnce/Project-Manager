@@ -54,8 +54,11 @@ public class ProjectService
         project.RepositoryUrl,
         project.CreatedAt,
         project.UpdatedAt,
-        project.Tasks?.Count ?? 0,
-        project.Notes?.Count ?? 0);
+        project.Tasks.Count,
+        // Alt görevler de sayılıyor - "proje %X bitti" tanımımız bu
+        // (bkz. ROADMAP, Bölüm 8'den çıkan yapılacaklar).
+        project.Tasks.Count(t => t.Status == WorkItemStatus.Done),
+        project.Notes.Count);
 
     // --- Slug üretimi ---
 

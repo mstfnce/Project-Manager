@@ -96,13 +96,14 @@ export function ProjectDetailPage() {
   const tasks = tasksData?.data ?? []
   const noteCount = notesData?.data.length ?? 0
 
-  // Tamamlanma yuzdesi burada gercekten hesaplanabiliyor: proje detayinda
-  // zaten butun gorevler elimizde. (Projeler listesinde hesaplanamiyor,
-  // orada sadece toplam gorev sayisi geliyor - bkz. ROADMAP 7.2.)
+  // Kanban sadece ana gorevleri gosteriyor, o yuzden mainTasks hala lazim -
+  // ama tamamlanma yuzdesi ALT GOREVLER DAHIL butun gorevlerden hesaplaniyor
+  // (bkz. ROADMAP, Bolum 8). Boylece bu sayfa ile Projeler listesindeki
+  // kart ayni yuzdeyi gosteriyor.
   const mainTasks = tasks.filter((task) => task.parentTaskId === null)
-  const doneCount = mainTasks.filter((task) => task.status === 'Done').length
+  const doneCount = tasks.filter((task) => task.status === 'Done').length
   const completionPercent =
-    mainTasks.length === 0 ? 0 : Math.round((doneCount / mainTasks.length) * 100)
+    tasks.length === 0 ? 0 : Math.round((doneCount / tasks.length) * 100)
 
   const tabs = [
     { value: 'kanban' as const, label: 'Kanban', icon: LayoutGrid, count: mainTasks.length },

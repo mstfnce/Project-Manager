@@ -13,4 +13,8 @@ public record ProjectResponse(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     int TaskCount,
+    // Tamamlanan görev sayısı. Yüzdeyi backend hesaplayıp göndermiyoruz,
+    // iki sayıyı gönderip oranı frontend kuruyor - böylece kartta "3/8"
+    // gibi başka bir gösterim istersek backend'e dokunmamız gerekmiyor.
+    int CompletedTaskCount,
     int NoteCount);

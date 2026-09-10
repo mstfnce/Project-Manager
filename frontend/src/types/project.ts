@@ -15,6 +15,7 @@ export interface ProjectResponse {
   createdAt: string
   updatedAt: string
   taskCount: number
+  completedTaskCount: number
   noteCount: number
 }
 
