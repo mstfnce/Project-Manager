@@ -24,3 +24,7 @@ dist/
 
 # ---- graphify ----
 graphify-out/
+
+# ---- Claude Code ----
+# Yerel ajan talimatlari - makineye ozel, repoya girmez
+CLAUDE.md
