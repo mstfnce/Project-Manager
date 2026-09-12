@@ -71,6 +71,7 @@ function KanbanColumn({
             type="button"
             onClick={onAddTask}
             title="Görev ekle"
+            aria-label="Görev ekle"
             className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
           >
             <Plus className="size-[18px]" />

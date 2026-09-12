@@ -150,6 +150,8 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
               <button
                 type="button"
                 onClick={() => handleEditClick(selectedNote)}
+                title="Notu düzenle"
+                aria-label="Notu düzenle"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <Pencil className="size-4" />
@@ -157,6 +159,8 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
               <button
                 type="button"
                 onClick={() => handleDeleteClick(selectedNote)}
+                title="Notu sil"
+                aria-label="Notu sil"
                 className="text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="size-4" />

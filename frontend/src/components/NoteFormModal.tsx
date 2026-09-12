@@ -225,7 +225,12 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
                   className="flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-xs text-foreground"
                 >
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)}>
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    title={`"${tag}" etiketini kaldır`}
+                    aria-label={`"${tag}" etiketini kaldır`}
+                  >
                     <X className="size-3" />
                   </button>
                 </span>

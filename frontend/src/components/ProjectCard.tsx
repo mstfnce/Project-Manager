@@ -96,6 +96,8 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               e.preventDefault()
               onEdit(project)
             }}
+            title="Projeyi düzenle"
+            aria-label="Projeyi düzenle"
             className="text-faint hover:text-foreground"
           >
             <Pencil className="size-3.5" />
@@ -107,6 +109,8 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               e.preventDefault()
               onDelete(project)
             }}
+            title="Projeyi sil"
+            aria-label="Projeyi sil"
             className="text-faint hover:text-destructive"
           >
             <Trash2 className="size-3.5" />

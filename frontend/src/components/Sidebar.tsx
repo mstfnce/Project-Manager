@@ -82,6 +82,7 @@ export function Sidebar() {
           type="button"
           onClick={toggleCollapsed}
           title={isCollapsed ? 'Menüyü aç' : 'Menüyü kapat'}
+          aria-label={isCollapsed ? 'Menüyü aç' : 'Menüyü kapat'}
           className={`grid size-8 flex-shrink-0 place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground ${
             isCollapsed ? '' : 'ml-auto'
           }`}
@@ -221,6 +222,7 @@ export function Sidebar() {
           type="button"
           onClick={handleLogout}
           title="Oturumu Kapat"
+          aria-label="Oturumu Kapat"
           className="flex size-7 flex-shrink-0 items-center justify-center rounded-lg text-sidebar-foreground/50 hover:text-destructive"
         >
           <LogOut className="size-4" />

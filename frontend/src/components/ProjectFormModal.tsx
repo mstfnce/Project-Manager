@@ -158,7 +158,12 @@ export function ProjectFormModal({ open, onOpenChange, project }: ProjectFormMod
                   className="flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-xs text-foreground"
                 >
                   {tech}
-                  <button type="button" onClick={() => removeTag(tech)}>
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tech)}
+                    title={`"${tech}" teknolojisini kaldır`}
+                    aria-label={`"${tech}" teknolojisini kaldır`}
+                  >
                     <X className="size-3" />
                   </button>
                 </span>
