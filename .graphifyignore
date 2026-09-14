@@ -1,0 +1,14 @@
+# Tasarim kaynaklari - kodu anlatmiyorlar, sadece Stitch mockup ciktilari.
+# Her gorsel graphify'da ayri bir LLM agent'i aciyor ve ~60K token yakiyor;
+# 13.09.2026'daki guncellemede toplam 767K'nin ~356K'si bu klasore gitti.
+docs/design/
+
+# Sunum dosyasi (binary)
+docs/*.pptx
+
+# Uretilen ciktilar
+graphify-out/
+node_modules/
+bin/
+obj/
+dist/
