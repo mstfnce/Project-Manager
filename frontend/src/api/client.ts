@@ -1,9 +1,12 @@
 import axios from 'axios'
 
 // Backend adresi tek yerde tanımlı; diğer dosyalar sadece '/projects' gibi
-// kısa yolları yazar, tam adresle uğraşmaz.
+// kısa yolları yazar, tam adresle uğraşmaz. Production build'de .env.production
+// devreye girip adresi '/api' yapar, Nginx bunu backend'e proxy'ler.
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5259/api'
+
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:5259/api',
+  baseURL,
 })
 
 // İstek backend'e gitmeden hemen önce araya girer: login sonrası
