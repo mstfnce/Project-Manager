@@ -1,8 +1,9 @@
-# Proje Takip (Project Manager)
+# PDKS — Proje Denetleme Kontrol Sistemi
 
 Projelerini, görevlerini ve notlarını tek yerden takip etmek için yazılmış
-bir web uygulaması. Aynı zamanda modern web geliştirme pratiklerini adım adım
-öğrenmek için yürütülen bir çalışma — yol haritası `ROADMAP.md`'de.
+bir proje denetleme kontrol uygulaması. Aynı zamanda modern web geliştirme
+pratiklerini adım adım öğrenmek için yürütülen bir çalışma — yol haritası
+`ROADMAP.md`'de.
 
 **Teknolojiler:** .NET 10 Web API (Clean Architecture) · PostgreSQL + EF Core ·
 JWT kimlik doğrulama · React + TypeScript + Vite · Tailwind CSS + shadcn/ui ·

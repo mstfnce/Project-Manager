@@ -71,11 +71,21 @@ export function Sidebar() {
           isCollapsed ? 'flex-col items-center' : 'items-center'
         }`}
       >
-        <div className="flex size-8 flex-shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sm font-extrabold text-sidebar-primary-foreground">
-          T
+        <div className="flex size-8 flex-shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+          <svg viewBox="0 0 32 32" fill="none" className="size-[18px]">
+            <rect x="6" y="12" width="17" height="14" rx="2.6" fill="currentColor" fillOpacity=".3" />
+            <rect x="9" y="8" width="17" height="14" rx="2.6" fill="currentColor" />
+            <path
+              d="M13.4 15l2.8 2.8L21 13"
+              stroke="var(--color-sidebar-primary)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
         {!isCollapsed && (
-          <span className="text-[15px] font-bold text-sidebar-foreground">Takip</span>
+          <span className="text-[15px] font-bold text-sidebar-foreground">PDKS</span>
         )}
 
         <button
