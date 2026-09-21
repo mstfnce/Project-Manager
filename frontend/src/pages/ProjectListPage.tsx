@@ -82,11 +82,11 @@ export function ProjectListPage() {
   }
 
   if (isLoading) {
-    return <div className="p-8 text-muted-foreground">Yükleniyor...</div>;
+    return <div className="p-4 sm:p-8 text-muted-foreground">Yükleniyor...</div>;
   }
 
   if (error) {
-    return <div className="p-8 text-destructive">Projeler yüklenemedi.</div>;
+    return <div className="p-4 sm:p-8 text-destructive">Projeler yüklenemedi.</div>;
   }
 
   const projects = data?.data ?? [];
@@ -97,7 +97,7 @@ export function ProjectListPage() {
       : projects.filter((project) => project.status === statusFilter);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1.5 text-[11.5px] font-bold uppercase tracking-[0.04em] text-brand">

@@ -85,11 +85,11 @@ export function ProjectDetailPage() {
   }
 
   if (isProjectLoading) {
-    return <div className="p-8 text-muted-foreground">Yükleniyor...</div>
+    return <div className="p-4 sm:p-8 text-muted-foreground">Yükleniyor...</div>
   }
 
   if (projectError) {
-    return <div className="p-8 text-destructive">Proje yüklenemedi.</div>
+    return <div className="p-4 sm:p-8 text-destructive">Proje yüklenemedi.</div>
   }
 
   const project = projectData?.data
@@ -112,7 +112,7 @@ export function ProjectDetailPage() {
   ]
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       {/* Proje kimlik karti */}
       <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">

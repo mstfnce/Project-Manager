@@ -13,9 +13,14 @@ import {
 } from 'lucide-react'
 import { getProjects } from '@/api/projects'
 
+interface SidebarProps {
+  isMobileOpen: boolean
+  onMobileClose: () => void
+}
+
 // Sidebar tum korumali sayfalarda ayni - Layout.tsx bunu her sayfanin
 // soluna sabit olarak yerlestiriyor.
-export function Sidebar() {
+export function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -60,9 +65,9 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`flex h-screen flex-shrink-0 flex-col gap-6 border-r border-sidebar-border bg-sidebar p-4 transition-[width] ${
+      className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col gap-6 border-r border-sidebar-border bg-sidebar p-4 transition-transform md:static md:z-auto md:translate-x-0 md:transition-[width] ${
         isCollapsed ? 'w-[72px]' : 'w-60'
-      }`}
+      } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       {/* Katliyken 72px'e logo + buton yan yana sigmiyordu (buton eziliyordu),
           o yuzden katliyken alt alta diziliyorlar. */}
@@ -109,6 +114,7 @@ export function Sidebar() {
         <Link
           to="/dashboard"
           title="Dashboard"
+          onClick={onMobileClose}
           className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-semibold transition-colors ${
             isCollapsed ? 'justify-center' : ''
           } ${
@@ -124,6 +130,7 @@ export function Sidebar() {
         <Link
           to="/projects"
           title="Projeler"
+          onClick={onMobileClose}
           className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-semibold transition-colors ${
             isCollapsed ? 'justify-center' : 'justify-between'
           } ${
@@ -158,6 +165,7 @@ export function Sidebar() {
               <Link
                 key={project.id}
                 to={`/projects/${project.id}`}
+                onClick={onMobileClose}
                 className="flex items-center justify-between rounded-lg px-2 py-1.5 text-[12.8px] font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <span className="flex items-center gap-2">
@@ -176,6 +184,7 @@ export function Sidebar() {
         <Link
           to="/notes"
           title="Notlar"
+          onClick={onMobileClose}
           className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-semibold transition-colors ${
             isCollapsed ? 'justify-center' : ''
           } ${

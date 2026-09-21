@@ -8,18 +8,18 @@ export function DashboardPage() {
   })
 
   if (isLoading) {
-    return <div className="p-8 text-muted-foreground">Yükleniyor...</div>
+    return <div className="p-4 sm:p-8 text-muted-foreground">Yükleniyor...</div>
   }
 
   if (error) {
-    return <div className="p-8 text-destructive">Özet yüklenemedi.</div>
+    return <div className="p-4 sm:p-8 text-destructive">Özet yüklenemedi.</div>
   }
 
   const summary = data?.data
   const upcomingDeadlines = summary?.upcomingDeadlines ?? []
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
       </div>
