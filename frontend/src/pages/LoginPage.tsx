@@ -37,10 +37,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm"
+        className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
       >
         <h1 className="mb-6 text-xl font-semibold text-foreground">Giris Yap</h1>
 

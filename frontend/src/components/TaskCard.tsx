@@ -58,9 +58,13 @@ export function TaskCard({ task, onClick, subTaskTotal, subTaskDone }: TaskCardP
       {...attributes}
       onClick={() => onClick(task)}
       // hover'da kartin bir tik yukari kalkmasi, sutun zemininden ayrildigi
-      // hissini veriyor - referans tasarimdaki davranis.
-      className={`flex cursor-pointer flex-col gap-3 rounded-xl bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-        isDragging ? 'opacity-50' : ''
+      // hissini veriyor - referans tasarimdaki davranis. transition-all
+      // surukleme sirasinda KAPALI: dnd-kit transform'u her fare hareketinde
+      // guncelliyor, transition acikken her guncelleme kendi 150ms'lik
+      // animasyonuna giriyor ve kart fareyi geriden takip ediyormus gibi
+      // takiliyordu (10.09.2026'da hover efektiyle birlikte eklenmisti).
+      className={`flex cursor-pointer flex-col gap-3 rounded-xl bg-card p-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md ${
+        isDragging ? 'opacity-50' : 'transition-all'
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
