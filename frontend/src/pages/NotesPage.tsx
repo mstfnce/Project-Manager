@@ -18,6 +18,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { NoteType, NoteWithProjectResponse } from '@/types/note'
 
 const typeFilters: { value: NoteType | 'All'; label: string }[] = [
@@ -222,20 +229,24 @@ export function NotesPage() {
 
         <div className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2 text-[12.5px] font-bold text-muted-foreground">
           <FolderOpen className="size-3.5 shrink-0" />
-          <select
-            value={projectFilter}
-            onChange={(e) =>
-              setProjectFilter(e.target.value === 'All' ? 'All' : Number(e.target.value))
+          <Select
+            value={String(projectFilter)}
+            onValueChange={(value) =>
+              setProjectFilter(value === 'All' ? 'All' : Number(value))
             }
-            className="bg-transparent outline-none"
           >
-            <option value="All">Tüm projeler</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="h-auto w-auto gap-1.5 rounded-none border-0 bg-transparent p-0 text-[12.5px] font-bold text-muted-foreground shadow-none focus-visible:ring-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">Tüm projeler</SelectItem>
+              {projects.map((project) => (
+                <SelectItem key={project.id} value={String(project.id)}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex flex-wrap gap-1">
