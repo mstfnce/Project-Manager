@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ListTodo } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { createTask, updateTask } from '@/api/tasks'
@@ -14,6 +14,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { TaskPriorityLevel, TaskResponse, TaskStatus } from '@/types/task'
 
@@ -60,6 +67,7 @@ export function TaskFormModal({ open, onOpenChange, task, projectId }: TaskFormM
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -185,17 +193,24 @@ export function TaskFormModal({ open, onOpenChange, task, projectId }: TaskFormM
               >
                 Öncelik
               </label>
-              <select
-                id="priority"
-                {...register('priority')}
-                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
-              >
-                {priorityOptions.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="priority"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="priority" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {priorityOptions.map((priority) => (
+                        <SelectItem key={priority} value={priority}>
+                          {priority}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
@@ -214,17 +229,24 @@ export function TaskFormModal({ open, onOpenChange, task, projectId }: TaskFormM
               <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-foreground">
                 Durum
               </label>
-              <select
-                id="status"
-                {...register('status')}
-                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="status" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           )}
 

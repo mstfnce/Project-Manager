@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FolderPlus, X } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { createProject, updateProject } from '@/api/projects'
@@ -15,6 +15,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { ProjectResponse, ProjectStatus } from '@/types/project'
 
@@ -47,6 +54,7 @@ export function ProjectFormModal({ open, onOpenChange, project }: ProjectFormMod
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -199,17 +207,24 @@ export function ProjectFormModal({ open, onOpenChange, project }: ProjectFormMod
               <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-foreground">
                 Durum
               </label>
-              <select
-                id="status"
-                {...register('status')}
-                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="status" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           )}
 

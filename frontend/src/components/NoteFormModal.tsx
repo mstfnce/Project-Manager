@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { StickyNote, Upload, X } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import ReactMarkdown from 'react-markdown'
@@ -19,6 +19,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { NoteResponse, NoteType } from '@/types/note'
 
@@ -73,6 +80,7 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     watch,
@@ -236,18 +244,24 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
               >
                 Proje
               </label>
-              <select
-                id="projectId"
-                {...register('projectId')}
-                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
-              >
-                <option value="">Proje seçin...</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="projectId"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="projectId" className="w-full">
+                      <SelectValue placeholder="Proje seçin..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={String(project.id)}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.projectId && (
                 <p className="mt-1 text-sm text-destructive">{errors.projectId.message}</p>
               )}
@@ -269,17 +283,24 @@ export function NoteFormModal({ open, onOpenChange, note, projectId }: NoteFormM
               <label htmlFor="type" className="mb-1.5 block text-sm font-medium text-foreground">
                 Tür
               </label>
-              <select
-                id="type"
-                {...register('type')}
-                className="w-full rounded-xl bg-muted px-3 py-2 text-sm text-foreground outline-none"
-              >
-                {typeOptions.map((type) => (
-                  <option key={type} value={type}>
-                    {typeLabels[type]}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="type"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="type" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typeOptions.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {typeLabels[type]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
 
