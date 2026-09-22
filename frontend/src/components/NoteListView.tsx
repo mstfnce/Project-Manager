@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import { deleteNote, getNotesByProject } from '@/api/notes'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { NoteCard, noteTypeColors, noteTypeLabels } from '@/components/NoteCard'
-import { NoteFormModal } from '@/components/NoteFormModal'
 import type { NoteResponse, NoteType } from '@/types/note'
 
 const typeFilters: { value: NoteType | 'All'; label: string }[] = [
@@ -24,12 +23,17 @@ interface NoteListViewProps {
   // Global Notlar sayfasindan "Projeye git" ile gelindiyse, hangi notun
   // secili olarak acilacagi (adresteki ?note=12 parametresinden).
   initialNoteId?: number | null
+  // Not ekleme/duzenleme modali artik ProjectDetailPage'de duruyor (Task
+  // modaliyla ayni desen) - ust sekmenin yanindaki "Ekle" butonu Notlar
+  // sekmesindeyken bu callback'i tetikliyor, ayrica burada kendi butonuna
+  // gerek kalmiyor.
+  onEditNote: (note: NoteResponse) => void
 }
 
 // Kanban/Duz Liste'nin aksine notlar 'tasks' cache'iyle hic karismiyor
 // (bkz. docs/planlar/not-listesi-roadmap.md karar 1) - kendi useQuery'sini
 // burada, kendi icinde tutuyor, sadece bu sekme acikken fetch ediliyor.
-export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
+export function NoteListView({ projectId, initialNoteId, onEditNote }: NoteListViewProps) {
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
@@ -42,8 +46,6 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(
     initialNoteId ?? null,
   )
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingNote, setEditingNote] = useState<NoteResponse | null>(null)
   // Silme onayi bekleyen not - doluysa ConfirmDialog acik demek.
   const [deletingNote, setDeletingNote] = useState<NoteResponse | null>(null)
 
@@ -60,16 +62,6 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
   // gostermeyelim diye.
   const selectedNote =
     filteredNotes.find((note) => note.id === selectedNoteId) ?? filteredNotes[0] ?? null
-
-  function handleAddClick() {
-    setEditingNote(null)
-    setIsModalOpen(true)
-  }
-
-  function handleEditClick(note: NoteResponse) {
-    setEditingNote(note)
-    setIsModalOpen(true)
-  }
 
   // Cop kutusu sadece onay kutusunu aciyor, silme islemi kullanici
   // onaylayinca ConfirmDialog'un onConfirm'unde yapiliyor.
@@ -109,15 +101,6 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
             {filter.label}
           </button>
         ))}
-
-        <button
-          type="button"
-          onClick={handleAddClick}
-          className="ml-auto flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-        >
-          <Plus className="size-3.5" />
-          Yeni Not
-        </button>
       </div>
 
       {filteredNotes.length === 0 ? (
@@ -149,7 +132,7 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                onClick={() => handleEditClick(selectedNote)}
+                onClick={() => onEditNote(selectedNote)}
                 title="Notu düzenle"
                 aria-label="Notu düzenle"
                 className="text-muted-foreground hover:text-foreground"
@@ -208,14 +191,6 @@ export function NoteListView({ projectId, initialNoteId }: NoteListViewProps) {
           )}
         </div>
       )}
-
-      <NoteFormModal
-        key={editingNote?.id ?? 'create'}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        note={editingNote}
-        projectId={projectId}
-      />
 
       <ConfirmDialog
         open={deletingNote !== null}

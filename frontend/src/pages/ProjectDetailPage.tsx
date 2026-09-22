@@ -6,9 +6,11 @@ import { getNotesByProject } from '@/api/notes'
 import { getProjectById } from '@/api/projects'
 import { getTasksByProject } from '@/api/tasks'
 import { KanbanBoard } from '@/components/KanbanBoard'
+import { NoteFormModal } from '@/components/NoteFormModal'
 import { NoteListView } from '@/components/NoteListView'
 import { TaskFormModal } from '@/components/TaskFormModal'
 import { TaskListView } from '@/components/TaskListView'
+import type { NoteResponse } from '@/types/note'
 import type { ProjectStatus } from '@/types/project'
 import type { TaskResponse } from '@/types/task'
 
@@ -57,6 +59,12 @@ export function ProjectDetailPage() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskResponse | null>(null)
 
+  // Not ekleme/duzenleme modali de ayni desende burada duruyor - ust
+  // sekmenin yanindaki "Ekle" butonu Notlar sekmesindeyken bunu tetikliyor,
+  // NoteListView'in kendi butonu kaldirildi (artik gereksizdi).
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
+  const [editingNote, setEditingNote] = useState<NoteResponse | null>(null)
+
   const { data: projectData, isLoading: isProjectLoading, error: projectError } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => getProjectById(projectId),
@@ -82,6 +90,16 @@ export function ProjectDetailPage() {
   function handleEditTask(task: TaskResponse) {
     setEditingTask(task)
     setIsTaskModalOpen(true)
+  }
+
+  function handleAddNote() {
+    setEditingNote(null)
+    setIsNoteModalOpen(true)
+  }
+
+  function handleEditNote(note: NoteResponse) {
+    setEditingNote(note)
+    setIsNoteModalOpen(true)
   }
 
   if (isProjectLoading) {
@@ -200,18 +218,21 @@ export function ProjectDetailPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Simdilik sadece gorsel - ileride goreve gore filtrelemeyi aktif edecegiz. */}
-          <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-[13px] font-semibold text-foreground shadow-sm">
-            <ListFilter className="size-[17px] text-muted-foreground" />
-            Tüm Görevler
-          </div>
+          {/* Filtre kutusu sadece gorev sekmelerinde anlamli - Notlar'in
+              kendi tur filtresi (Tumu/Karar/...) zaten asagida duruyor. */}
+          {view !== 'notes' && (
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-[13px] font-semibold text-foreground shadow-sm">
+              <ListFilter className="size-[17px] text-muted-foreground" />
+              Tüm Görevler
+            </div>
+          )}
           <button
             type="button"
-            onClick={handleAddTask}
+            onClick={view === 'notes' ? handleAddNote : handleAddTask}
             className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             <Plus className="size-[17px]" />
-            Görev Ekle
+            {view === 'notes' ? 'Not Ekle' : 'Görev Ekle'}
           </button>
         </div>
       </div>
@@ -239,6 +260,7 @@ export function ProjectDetailPage() {
         <NoteListView
           projectId={projectId}
           initialNoteId={Number(searchParams.get('note')) || null}
+          onEditNote={handleEditNote}
         />
       )}
 
@@ -250,6 +272,14 @@ export function ProjectDetailPage() {
         open={isTaskModalOpen}
         onOpenChange={setIsTaskModalOpen}
         task={editingTask}
+        projectId={projectId}
+      />
+
+      <NoteFormModal
+        key={editingNote?.id ?? 'create-note'}
+        open={isNoteModalOpen}
+        onOpenChange={setIsNoteModalOpen}
+        note={editingNote}
         projectId={projectId}
       />
     </div>
