@@ -1,9 +1,20 @@
 import { FolderKanban, ListChecks, Rocket } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getDashboardSummary } from '@/api/dashboard'
 import { getProjects } from '@/api/projects'
 import { statusColors, statusLabels } from '@/components/ProjectCard'
+import type { ProjectStatus } from '@/types/project'
+
+const statusFilters: { value: ProjectStatus | 'All'; label: string }[] = [
+  { value: 'All', label: 'Tümü' },
+  { value: 'Active', label: statusLabels.Active },
+  { value: 'Planning', label: statusLabels.Planning },
+  { value: 'Paused', label: statusLabels.Paused },
+  { value: 'Completed', label: statusLabels.Completed },
+  { value: 'Archived', label: statusLabels.Archived },
+]
 
 // Ust siradaki 3 kutunun ortak ikon/renk deseni - hepsi ayni rozet
 // stilinde (index.css token'lari), sadece ikon degisiyor. Yeni hex
@@ -29,6 +40,19 @@ export function DashboardPage() {
     queryFn: getProjects,
   })
   const projects = projectsData?.data ?? []
+
+  // Filtre gizlemiyor, sadece secilen durumdaki projeleri basa aliyor -
+  // digerleri altta, gorunur kalmaya devam ediyor. stabil sort (Array.sort
+  // ES2019'dan beri stabil) sayesinde ayni grup icindeki sira degismiyor.
+  const [progressFilter, setProgressFilter] = useState<ProjectStatus | 'All'>('All')
+  const sortedProjects =
+    progressFilter === 'All'
+      ? projects
+      : [...projects].sort((a, b) => {
+          const aMatches = a.status === progressFilter ? 0 : 1
+          const bMatches = b.status === progressFilter ? 0 : 1
+          return aMatches - bMatches
+        })
 
   if (isLoading) {
     return <div className="p-4 sm:p-8 text-muted-foreground">Yükleniyor...</div>
@@ -122,11 +146,28 @@ export function DashboardPage() {
             </Link>
           </div>
 
-          {projects.length === 0 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-1.5">
+            {statusFilters.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => setProgressFilter(filter.value)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                  progressFilter === filter.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
+          {sortedProjects.length === 0 ? (
             <p className="text-sm text-muted-foreground">Henüz proje yok.</p>
           ) : (
             <ul className="flex flex-col gap-4">
-              {projects.map((project) => {
+              {sortedProjects.map((project) => {
                 // taskCount 0 olabilir (yeni acilmis proje) - 0'a bolme
                 // yerine "henuz gorev yok" gosteriyoruz.
                 const percent =
