@@ -5,7 +5,9 @@ import type { ProjectResponse, ProjectStatus } from '@/types/project'
 // Her durumun rozet/ikon rengi - Takip tasarim sistemindeki (docs/design)
 // hex degerlerle birebir. index.css'teki genel token'lardan degil, cunku her
 // durumun kendine ozgu bir rengi var (5 farkli anlam, tek bir "accent" yetmez).
-const statusColors: Record<ProjectStatus, string> = {
+// DashboardPage'deki proje ilerleme listesi de ayni renk/etiket dilini
+// kullaniyor (NoteCard'daki noteTypeColors export deseniyle ayni gerekce).
+export const statusColors: Record<ProjectStatus, string> = {
   Planning: 'bg-[#EEF1F5] text-[#52606D]',
   Active: 'bg-[#DCE9FF] text-[#1E2A4A]',
   Paused: 'bg-[#FBEEDD] text-[#A05A16]',
@@ -22,7 +24,7 @@ const statusDotColors: Record<ProjectStatus, string> = {
   Archived: 'bg-[#6B7690]',
 }
 
-const statusLabels: Record<ProjectStatus, string> = {
+export const statusLabels: Record<ProjectStatus, string> = {
   Planning: 'Planlama',
   Active: 'Aktif',
   Paused: 'Duraklatıldı',
