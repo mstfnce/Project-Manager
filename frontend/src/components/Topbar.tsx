@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, Plus, Search } from 'lucide-react'
 
 interface TopbarProps {
@@ -9,6 +9,10 @@ interface TopbarProps {
 // tum korumali sayfalarda ayni.
 export function Topbar({ onMenuClick }: TopbarProps) {
   const displayName = localStorage.getItem('displayName') ?? 'Kullanıcı'
+  const location = useLocation()
+  // Projeler sayfasinin kendi "+ Yeni Proje" butonu var - ikisi ayni anda
+  // gorununce ayni islev iki kere gosteriliyordu, o yuzden orada gizliyoruz.
+  const isProjectsPage = location.pathname === '/projects'
 
   return (
     <header className="flex items-center gap-3 border-b border-border bg-background/85 px-4 py-4 backdrop-blur md:gap-4 md:px-8">
@@ -34,13 +38,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="ml-auto flex items-center gap-3">
         {/* ?new=1 - ProjectListPage bu parametreyi gorunce "yeni proje"
             modalini otomatik aciyor. */}
-        <Link
-          to="/projects?new=1"
-          className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-[13px] font-bold text-primary-foreground shadow-sm hover:bg-primary/90 sm:px-4"
-        >
-          <Plus className="size-[15px]" />
-          <span className="hidden sm:inline">Yeni Proje</span>
-        </Link>
+        {!isProjectsPage && (
+          <Link
+            to="/projects?new=1"
+            className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-[13px] font-bold text-primary-foreground shadow-sm hover:bg-primary/90 sm:px-4"
+          >
+            <Plus className="size-[15px]" />
+            <span className="hidden sm:inline">Yeni Proje</span>
+          </Link>
+        )}
 
         <div className="grid size-[34px] place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-[13px] font-bold text-primary-foreground">
           {displayName.slice(0, 2).toUpperCase()}
