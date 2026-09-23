@@ -4,6 +4,9 @@ obj/
 *.user
 *.suo
 
+# ---- Kullanici yuklemeleri (notlara eklenen resimler) ----
+backend/src/ProjectManager.Api/wwwroot/uploads/
+
 # ---- Node / Frontend ----
 node_modules/
 dist/

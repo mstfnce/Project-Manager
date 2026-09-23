@@ -13,10 +13,12 @@ namespace ProjectManager.Api.Controllers;
 public class NotesController : ControllerBase
 {
     private readonly NoteService _noteService;
+    private readonly NoteImageService _noteImageService;
 
-    public NotesController(NoteService noteService)
+    public NotesController(NoteService noteService, NoteImageService noteImageService)
     {
         _noteService = noteService;
+        _noteImageService = noteImageService;
     }
 
     // GET /api/projects/{projectId}/notes
@@ -77,5 +79,19 @@ public class NotesController : ControllerBase
         if (!deleted) return NotFound();
 
         return NoContent();
+    }
+
+    [HttpPost("/api/notes/images")]
+    public async Task<IActionResult> UploadImage(IFormFile file)
+    {
+        try
+        {
+            var url = await _noteImageService.UploadAsync(file.OpenReadStream(), file.FileName, file.Length);
+            return Ok(new { url });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

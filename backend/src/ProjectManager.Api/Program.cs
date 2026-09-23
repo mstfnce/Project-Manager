@@ -41,6 +41,19 @@ builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<NoteService>();
 
+// Resim yukleme - LocalImageStorageService'e diskteki gercek klasor yolunu
+// burada veriyoruz (builder.Environment.WebRootPath), Infrastructure katmani
+// ASP.NET Core'un hosting tiplerini hic tanimadigi icin (bkz. LocalImageStorageService).
+var uploadsPath = Path.Combine(
+    builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot"),
+    "uploads", "notes");
+// UseStaticFiles(), wwwroot'un var olup olmadigina sunucu acilirken bir kere
+// bakiyor - klasor sonradan (ilk resim yuklendiginde) olusursa gormuyor.
+// Bu yuzden burada, ilk istekten once, eagerly olusturuyoruz.
+Directory.CreateDirectory(uploadsPath);
+builder.Services.AddScoped<IImageStorageService>(_ => new LocalImageStorageService(uploadsPath));
+builder.Services.AddScoped<NoteImageService>();
+
 // Dashboard icin yeni bir repository gerekmiyor - DashboardService zaten
 // var olan IProjectRepository/ITaskRepository'yi kullaniyor.
 builder.Services.AddScoped<DashboardService>();
@@ -108,6 +121,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors("Frontend");
 
